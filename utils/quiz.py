@@ -43,16 +43,6 @@ class Quiz:
             "multiple_answers_questions": [maq.__dict__ for maq in self.multiple_answer_questions]
         }
 
-    def write_toml_file(self, file_name: str):
-        """
-        Write the Quiz object to a TOML file with the specified file name.
-
-        :param file_name: The name of the TOML file to write.
-        """
-
-        with open(file_name, 'w') as toml_file:
-            toml_file.write(toml.dumps(self.to_dict()))
-
     def write_text_file(self, file_name: str):
         """
         Write the Quiz object to a text file with the specified file name.
@@ -72,6 +62,7 @@ class Quiz:
 
             if len(self.multiple_choice_questions) > 0:
                 text_file.write(MULTIPLE_CHOICE_HEADING)
+
             for mcq in self.multiple_choice_questions:
                 question = remove_html_tags(mcq.question)
                 choices = "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(mcq.choices)])
@@ -101,6 +92,16 @@ class Quiz:
 
                 text_file.write(f"{question}\n\nAnswer Bank:\n{answer_bank}\n\n"
                                 f"Word Bank:\n{word_bank}\n\nAnswers:\n{answers}{DASHES_WITH_NEWLINES}")
+
+    def write_toml_file(self, file_name: str):
+        """
+        Write the Quiz object to a TOML file with the specified file name.
+
+        :param file_name: The name of the TOML file to write.
+        """
+
+        with open(file_name, 'w') as toml_file:
+            toml_file.write(toml.dumps(self.to_dict()))
 
     def write_yaml_file(self, file_name: str):
         """

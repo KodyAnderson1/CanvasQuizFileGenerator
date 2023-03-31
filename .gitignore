@@ -131,3 +131,5 @@ dmypy.json
 # Added by author
 output/
 .idea/
+raw_html/*
+parsed_html/*
