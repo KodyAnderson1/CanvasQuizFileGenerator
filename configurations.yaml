@@ -1,0 +1,9 @@
+directory_paths:
+  windows:
+    parsed_html: "./html/parsed_html"
+    raw_html: "./html/raw_html"
+    output: "./output"
+  linux:
+    parsed_html: "./html/parsed_html"
+    raw_html: "./html/raw_html"
+    output: "./output"
