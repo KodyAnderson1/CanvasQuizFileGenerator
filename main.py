@@ -13,8 +13,7 @@ from utils.quiz import Quiz, QuizFileGenerator
 def load_directory_paths() -> Dict[str, str]:
     with open("configurations.yaml", "r") as f:
         paths = yaml.safe_load(f)
-    os_type = "windows" if os.name == "nt" else "linux"
-    return paths["directory_paths"][os_type]
+    return paths["directory_paths"]
 
 
 def create_directories(directories: dict) -> None:

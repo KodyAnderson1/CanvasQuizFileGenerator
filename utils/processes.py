@@ -91,11 +91,9 @@ class ProcessMultipleChoice:
         multiple_choice_questions = []
 
         for div in self.find_multiple_choice_questions():
-            mcq = MultipleChoiceQuestion()
-            mcq.question = remove_html_tags(self.get_question_text(div))
-            mcq.choices = clean_list(self.get_choices_text_mcq(div))
-            mcq.answer = clean_string(self.get_correct_answer(div))
-
+            mcq = MultipleChoiceQuestion(question=remove_html_tags(self.get_question_text(div)),
+                                         answer=clean_string(self.get_correct_answer(div)),
+                                         choices=clean_list(self.get_choices_text_mcq(div)))
             multiple_choice_questions.append(mcq)
 
         return multiple_choice_questions
@@ -155,46 +153,78 @@ class ProcessMatchingQuestions:
     def __init__(self, soup: BeautifulSoup = None):
         self.soup = soup
 
+    # def process(self) -> List[MatchingQuestion]:
+    #     """
+    #     Processes matching questions and returns a list of populated MatchingQuestion objects.
+    #
+    #     :return: A list of MatchingQuestion objects.
+    #     """
+    #     return_list = []
+    #
+    #     wrong_answers = [div.find_all('div', {'class': 'wrong_answer'}) for div in self.find_matching_questions()]
+    #
+    #     for the_divs in self.find_matching_questions():
+    #         matching_question = MatchingQuestion(question=self.get_question(the_divs),
+    #                                              word_bank=self.get_matching_words(the_divs),
+    #                                              answer_bank=self.get_matching_choices(the_divs))
+    #
+    #         answer_divs = [div for div in the_divs.find_all('div', {'class': 'answer'}) if div.has_attr('id')]
+    #
+    #         full_dict = {}
+    #         for each_div in answer_divs:
+    #             full_dict.update(self.get_matching_answers(each_div))
+    #
+    #         for wrong_answer in wrong_answers:
+    #             for stuff in wrong_answer:
+    #                 here = stuff.get('title')
+    #                 key = here.split("You selected", 1)[0].strip().replace(".", "")
+    #                 value = here.split("The correct answer was", 1)[1].strip().replace(".", "")
+    #                 full_dict[key] = value
+    #
+    #         matching_question.answers = full_dict
+    #
+    #         matching_question.answers = clean_dict(matching_question.answers)
+    #         matching_question.answer_bank = clean_list(matching_question.answer_bank)
+    #         matching_question.word_bank = clean_list(matching_question.word_bank)
+    #         return_list.append(matching_question)
+    #
+    #     return return_list
+
     def process(self) -> List[MatchingQuestion]:
-        """
-        Processes matching questions and returns a list of populated MatchingQuestion objects.
+        matching_question_divs = self.find_matching_questions()
+        wrong_answers = [div.find_all('div', {'class': 'wrong_answer'}) for div in matching_question_divs]
 
-        :param soup: A BeautifulSoup object containing the HTML source.
-        :return: A list of MatchingQuestion objects.
-        """
         return_list = []
-        all_questions = self.get_questions(self.soup)
-        all_matching_questions = self.find_matching_questions(all_questions)
-        wrong_answers = [div.find_all('div', {'class': 'wrong_answer'}) for div in all_matching_questions]
-
-        for the_divs in all_matching_questions:
-            matching_question = MatchingQuestion()
-            matching_question.word_bank = self.get_matching_words(the_divs)
-            matching_question.answer_bank = self.get_matching_choices(the_divs)
-
-            textarea = the_divs.find('textarea', {'class': 'textarea_question_text'})
-            matching_question.question = remove_html_tags(clean_string(textarea.text.strip())) if textarea else ""
+        for the_divs, wrong_answer in zip(matching_question_divs, wrong_answers):
+            matching_question = MatchingQuestion(question=self.get_question(the_divs),
+                                                 word_bank=self.get_matching_words(the_divs),
+                                                 answer_bank=self.get_matching_choices(the_divs))
 
             answer_divs = [div for div in the_divs.find_all('div', {'class': 'answer'}) if div.has_attr('id')]
-            full_dict = {}
-            for each_div in answer_divs:
-                full_dict.update(self.get_matching_answers(each_div))
+            full_dict = {k: v for each_div in answer_divs for k, v in self.get_matching_answers(each_div).items()}
 
-            for wrong_answer in wrong_answers:
-                for stuff in wrong_answer:
-                    here = stuff.get('title')
-                    key = here.split("You selected", 1)[0].strip().replace(".", "")
-                    value = here.split("The correct answer was", 1)[1].strip().replace(".", "")
-                    full_dict[key] = value
+            wrong_answer_dict = {stuff.get('title').split("You selected", 1)[0].strip().replace(".", ""):
+                                     stuff.get('title').split("The correct answer was", 1)[1].strip().replace(".", "")
+                                 for stuff in wrong_answer}
+            full_dict.update(wrong_answer_dict)
 
-            matching_question.answers = full_dict
-
-            matching_question.answers = clean_dict(matching_question.answers)
+            matching_question.answers = clean_dict(full_dict)
             matching_question.answer_bank = clean_list(matching_question.answer_bank)
             matching_question.word_bank = clean_list(matching_question.word_bank)
             return_list.append(matching_question)
 
         return return_list
+
+    @staticmethod
+    def get_question(soup: BeautifulSoup) -> str:
+        """
+        Extracts the question text from a given div element.
+
+        :param soup: A BeautifulSoup object containing a matching question.
+        :return: The question text for the matching question.
+        """
+        question_textarea = soup.find("textarea", {"name": "question_text"})
+        return remove_html_tags(clean_string(question_textarea.text.strip()))
 
     @staticmethod
     def get_matching_words(soup: BeautifulSoup) -> List[str]:
@@ -215,30 +245,19 @@ class ProcessMatchingQuestions:
         """
         return [div.get_text(strip=True) for div in soup.find_all('div', {'class': 'answer_match_right'})]
 
-    @staticmethod
-    def get_questions(soup: BeautifulSoup) -> List:
-        """
-        Retrieves all the questions from a BeautifulSoup object.
-
-        :param soup: A BeautifulSoup object containing the HTML source.
-        :return: A list of question elements.
-        """
-        return soup.find_all('div', {'aria-label': 'Question'})
-
-    @staticmethod
-    def find_matching_questions(divs: List) -> List:
+    def find_matching_questions(self) -> List:
         """
         Finds all the matching questions in a list of question elements.
-        :param divs: A list of question elements.
+
         :return: A list of matching question elements.
         """
-        return [div.find('div', {'class': 'matching_question'}) for div in divs if
-                div.find('div', {'class': 'matching_question'})]
+        return self.soup.find_all("div", class_="matching_question")
 
     @staticmethod
     def get_matching_answers(parent_div: Tag) -> Dict[str, str]:
         """
         Retrieves the matching answers from a matching question element.
+
         :param parent_div: A BeautifulSoup object representing a matching question element.
         :return: A dictionary of matching answers.
         """

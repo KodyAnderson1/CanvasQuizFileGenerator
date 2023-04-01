@@ -7,9 +7,9 @@ import yaml
 from utils.utils import remove_html_tags
 
 INITAL_HEADING = f"==========================================\n             QUIZ INFORMATION\n==========================================\n"
-MULTIPLE_CHOICE_HEADING = f"==========================================\n         MULTIPLE CHOICE QUESTIONS\n==========================================\n"
-MULTIPLE_ANSWERS_HEADING = f"==========================================\n        MULTIPLE ANSWER QUESTIONS\n==========================================\n"
-MATCHING_QUESTIONS_HEADING = f"==========================================\n             MATCHING QUESTIONS\n==========================================\n"
+MULTIPLE_CHOICE_HEADING = f"==========================================\n         MULTIPLE CHOICE QUESTIONS\n==========================================\n\n"
+MULTIPLE_ANSWERS_HEADING = f"==========================================\n        MULTIPLE ANSWER QUESTIONS\n==========================================\n\n"
+MATCHING_QUESTIONS_HEADING = f"==========================================\n             MATCHING QUESTIONS\n==========================================\n\n"
 DASHES_WITH_NEWLINES = "\n--------------------------------\n\n"
 
 
