@@ -1,6 +1,7 @@
 # Quiz File Generation
 
-### DO NOT TRUST ANSWERS WITH POSITIONAL INDEXING FOR ANY FILE TYPE. ANSWERS CHANGE POSITION WHEN THE QUIZ FILES ARE GENERATED. MANUALLY CHECK AND EDIT THE ANSWERS.
+**DO NOT TRUST ANSWERS WITH POSITIONAL INDEXING FOR ANY FILE TYPE. ANSWERS CHANGE POSITION WHEN THE QUIZ FILES ARE
+GENERATED. MANUALLY CHECK AND EDIT THE ANSWERS.**
 
 Example:
 
@@ -19,10 +20,10 @@ identification.
 
 ---
 
-This project was made help to parse, create, and save quizzes in different file formats, such as text, JSON, YAML, and
-TOML from a Canvas `.html` file. Currently only works for quizzes with correct answers displayed. The `.html` needs to
-be the quiz itself, not a submission page or any other page that "loads" the quiz in as a secondary item.
-**Currently, will only output multiple choice, matching and multiple answer (selection box) questions**
+This project was made help to parse, create, and save quizzes in different file formats, such as text, markdown, JSON,
+YAML, and TOML from a Canvas `.html` file. The `.html` needs to be the quiz itself, not a submission page or any other
+page that "loads" the quiz in as a secondary item. **Currently, will only output multiple choice, matching and multiple
+answer (selection box) questions**
 
 ## Table of Contents
 
@@ -65,20 +66,19 @@ based on the specified file type(s).
 To use this script, run the following command:
 
 ```bash
-python main.py [-h] [-rm | -dm] [-f {txt,json,yaml,toml} [{txt,json,yaml,toml} ...]]
+python main.py [-h] [-rm | -dm] [-f {txt,md,json,yaml,toml} [{txt,md,json,yaml,toml} ...]]
 ```
 
 Here are the available flags:
 
 - `-h`, `--help`: Show the help message and exit.
-- `-f`, `--file_type`: The file type(s) to save the quiz as. Options: `txt`, `json`, `yaml`, `toml`. Default is `txt`.
-    - Example: `-f json yaml`.
+- `-f`, `--file_type`: The file type(s) to save the quiz as. Options: `txt`, `md`, `json`, `yaml`, `toml`. Default
+  is `txt`.
     - Example: `-f json`.
 - `-rm`, `--remove_html`: Flag to remove the HTML files instead of renaming and moving them. Default is False. Cannot
   use with `-dm`.
 - `-dm`, `--dont_move`: Flag to keep the HTML files in the `raw_html` folder instead of renaming and moving them.
-  Default is
-  False. Cannot use with `-rm`.
+  Default is False. Cannot use with `-rm`.
 
 Examples:
 
@@ -88,14 +88,12 @@ This command will create the specified file(s) with the quiz data and remove/del
 python main.py -rm -f json yaml txt
 ```
 
-This command will create `.txt` files with the quiz data and rename and move the .html files to
-the `parsed_html` directory.
+This command will create `.txt` file(s) with the quiz data and rename and move the .html files to the `parsed_html`
+directory.
 
 ```bash
 python main.py
 ```
-
----
 
 ### Changing File Paths
 
@@ -105,53 +103,10 @@ script's directory.
 
 ```yaml
 directory_paths:
-  windows:
-    parsed_html: "can\change\these\paths\html\parsed_html"
-    raw_html: "can\change\these\paths\html\raw_html"
-    output: "can\change\these\paths\output"
-  linux:
-    parsed_html: "can/change/these/paths/html/parsed_html"
-    raw_html: "can/change/these/paths/html/raw_html"
-    output: "can/change/these/paths/output"
+  parsed_html: "can/change/these/paths/html/parsed_html"
+  raw_html: "can/change/these/paths/html/raw_html"
+  output: "can/change/these/paths/output"
 ```
-
----
-
-## main.py
-
-This file utilizes the BeautifulSoup library to parse and process a raw HTML file containing quiz data. It then uses the
-classes from `quiz.py` to create a `Quiz` object and save it as a file in the specified format. The script
-accepts command-line arguments to choose the output file type.
-
-## Utils Directory
-
-### quiz.py
-
-This file contains the following classes:
-
-1. `Quiz`: A class representing a quiz with multiple choice and matching questions.
-2. `MultipleChoiceQuestion`: A class representing a multiple-choice question.
-3. `MatchingQuestion`: A class representing a matching question.
-4. `MultipleAnswerQuestion`: A class representing a multiple answer question.
-4. `QuizFileGenerator`: A class for saving quiz objects in different file formats.
-
-### processes.py
-
-This file contains the following classes:
-
-1. `ProcessMultipleAnswers`: A class for processing multiple answer questions.
-2. `ProcessMultipleChoice`: A class for processing multiple choice questions.
-3. `ProcessMatching`: A class for processing matching questions.
-
-### utils.py
-
-This file contains the following functions:
-
-1. `clean_dict`: Removes all but one whitespace between words, removes newlines, and removes keys with empty values.
-2. `clean_list`: Removes all but one whitespace between words, removes newlines from a list, and removes **duplicate**
-   items.
-3. `clean_string`: Removes all but one whitespace between words and removes newlines from a string.
-4. `remove_html_tags`: Removes certain html tags from a string
 
 ## Setting up a virtual environment
 
