@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import time
 
 from utils.processor import ProcessQuestions
-from utils.quiz import Quiz, QuizFileGenerator
+from utils.quiz import Quiz, QuizWriter
 
 """
 fill_in_multiple_blanks (Quiz 1 && HW3)
@@ -16,6 +16,7 @@ multiple_dropdowns_question (HW3)
 HW1 doesnt find a title
 
 TODO - Find the correct answers for Multiple Short Answer Questions (working in tester.py)
+Reason why answer order is being changed is because they are being added to a set, which is unordered. Then converted back to a list.
 
 """
 
@@ -69,10 +70,13 @@ def process_files(args, directories: dict) -> None:
         quiz.multiple_choice_questions = processor.process_multiple_choice()
         quiz.matching_questions = processor.process_matching()
         quiz.multiple_answer_questions = processor.process_multiple_answers()
+        quiz.multiple_short_answer_questions = processor.process_multiple_short_answers()
 
-        qfg = QuizFileGenerator(quiz)
+        # print(quiz.multiple_short_answer_questions)
+
+        qfg = QuizWriter(quiz)
         output_file = output_dir / f"{quiz.title}"
-        qfg.save_quiz_as_file(args.file_type, output_file)
+        qfg.write(args.file_type, output_file)
 
         new_html_file = parsed_html_dir / f"{quiz.title}.html"
         if args.remove_html:
@@ -89,8 +93,8 @@ def main():
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
     parser.add_argument(
         "-f", "--file_type", type=str, default="txt", nargs="+",
-        choices=["txt", "json", "yaml", "toml", "md"],
-        help="The file type to save the quiz as. Options: txt, md, json, yaml, toml."
+        choices=["txt", "json", "yaml", "md"],
+        help="The file type to save the quiz as. Options: txt, md, json, yaml."
     )
 
     exclusive_group = parser.add_mutually_exclusive_group()

@@ -8,8 +8,9 @@ from bs4 import BeautifulSoup
 import time
 
 from main import find_div_by_id, count_aria_labels
-from utils.processor import ProcessQuestions, get_question_text, find_elements_by_class
-from utils.quiz import Quiz, QuizFileGenerator, MultipleShortAnswerQuestion
+from utils.processor import ProcessQuestions, get_question_text, find_elements_by_class, text_by_filter
+from utils.quiz import Quiz, QuizWriter, MultipleShortAnswerQuestion
+from utils.utils import clean_input, clean_html
 
 
 def load_directory_paths() -> Dict[str, str]:
@@ -31,9 +32,10 @@ def main():
     soup = BeautifulSoup(html_content, "html.parser")
     # print(count_aria_labels(find_div_by_id(soup, "questions"), "Question"))
 
-    for stuff in process_multiple_short_answer(soup):
-        print(stuff)
-        print()
+    answ = process_multiple_short_answer(soup)
+
+    for a in answ:
+        print(a.answers)
 
 
 def process_multiple_short_answer(soup: BeautifulSoup) -> list[MultipleShortAnswerQuestion]:
@@ -44,7 +46,7 @@ def process_multiple_short_answer(soup: BeautifulSoup) -> list[MultipleShortAnsw
     :return: A list containing the question and the answers.
     """
     return [MultipleShortAnswerQuestion(question=get_question_text(div),
-                                        answers=[])
+                                        answers=text_by_filter(div, "answer_group", "answer_text"))
             for div in find_elements_by_class(soup, "fill_in_multiple_blanks_question")]
 
 

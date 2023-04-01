@@ -14,9 +14,14 @@ def clean_input(input_obj):
     elif isinstance(input_obj, dict):
         return {k.strip(): v.strip() for k, v in input_obj.items() if v.strip()}
     elif isinstance(input_obj, list):
-        return list(set([' '.join(item.strip().split()) for item in input_obj if item.strip()]))
+        return remove_duplicates([' '.join(item.strip().split()) for item in input_obj if item.strip()])
     else:
         return input_obj
+
+
+def remove_duplicates(input_list) -> List:
+    seen = set()
+    return [x for x in input_list if not (x in seen or seen.add(x))]
 
 
 def remove_html_tags(text):
@@ -48,4 +53,5 @@ def clean_html(soup) -> str:
     for nbsp_tag in soup.find_all(text=lambda t: t == '\xa0'):
         nbsp_tag.string.replace_with('')
 
+    # print(soup)
     return '\n\n'.join(line.strip() for line in soup.get_text().split('\n') if line.strip())

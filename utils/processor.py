@@ -1,7 +1,7 @@
 from typing import List, Dict
 from bs4 import BeautifulSoup, Tag
 
-from utils.quiz import MatchingQuestion, MultipleAnswersQuestion, MultipleChoiceQuestion
+from utils.quiz import MatchingQuestion, MultipleAnswersQuestion, MultipleChoiceQuestion, MultipleShortAnswerQuestion
 from utils.utils import clean_input, remove_html_tags, clean_html
 
 
@@ -14,8 +14,8 @@ def get_question_text(soup: BeautifulSoup) -> str:
     :param soup: A BeautifulSoup object containing a multiple answer question.
     :return: The question text for the multiple answer question.
     """
-    question_textarea = soup.find("textarea", {"name": "question_text"})
-    return remove_html_tags(clean_input(clean_html(question_textarea)))
+    question_textarea = soup.find("textarea", {"name": "question_text"}).text
+    return remove_html_tags(clean_input(question_textarea))
 
 
 def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:
@@ -30,8 +30,10 @@ def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = 
     if last_filter is None:
         return clean_input([div.get_text() for div in soup.find_all('div', class_=initial_filter)])
 
-    return clean_input(
-        [div.find("div", class_=last_filter).text for div in soup.find_all("div", class_=initial_filter)])
+    return clean_input([
+        div.find("div", class_=last_filter).text if div.find("div", class_=last_filter) else ""
+        for div in soup.find_all("div", class_=initial_filter)
+    ])
 
 
 def find_elements_by_class(soup: BeautifulSoup, filter_by: str):
@@ -85,6 +87,16 @@ class ProcessQuestions:
                                  answer_bank=text_by_filter(the_divs, "answer_match_right"),
                                  answers=self.get_answers_dict(the_divs, wrong_answer))
                 for the_divs, wrong_answer in zip(matching_question_divs, wrong_answers)]
+
+    def process_multiple_short_answers(self) -> list[MultipleShortAnswerQuestion]:
+        """
+        Processes a multiple short answer question.
+
+        :return: A list containing the question and the answers.
+        """
+        return [MultipleShortAnswerQuestion(question=get_question_text(div),
+                                            answers=text_by_filter(div, "answer_group", "answer_text"))
+                for div in find_elements_by_class(self.soup, "fill_in_multiple_blanks_question")]
 
     @staticmethod
     def get_mc_correct_answer(soup: BeautifulSoup) -> str:

@@ -72,8 +72,7 @@ python main.py [-h] [-rm | -dm] [-f {txt,md,json,yaml,toml} [{txt,md,json,yaml,t
 Here are the available flags:
 
 - `-h`, `--help`: Show the help message and exit.
-- `-f`, `--file_type`: The file type(s) to save the quiz as. Options: `txt`, `md`, `json`, `yaml`, `toml`. Default
-  is `txt`.
+- `-f`, `--file_type`: The file type(s) to save the quiz as. Options: `txt`, `md`, `json`, `yaml`. Default is `txt`.
     - Example: `-f json`.
 - `-rm`, `--remove_html`: Flag to remove the HTML files instead of renaming and moving them. Default is False. Cannot
   use with `-dm`.
