@@ -2,38 +2,21 @@ from typing import Dict, List
 import re
 
 
-def clean_dict(dictionary: Dict[str, str]) -> Dict[str, str]:
+def clean_input(input_obj):
     """
-    Removes all but one whitespace between words, removes newlines, and removes keys with empty values.
+    Cleans an input object by removing extra whitespace, newlines, and empty values.
 
-    :param dictionary: The input dictionary to be cleaned.
-    :return: A cleaned dictionary with no extra whitespaces or newline characters and no keys with empty values.
+    :param input_obj: The input object to clean.
+    :return: The cleaned object.
     """
-    cleaned_dict = {k.strip(): v.strip() for k, v in dictionary.items() if v.strip()}
-    return cleaned_dict
-
-
-def clean_list(lst: List[str]) -> List[str]:
-    """
-    Removes all but one whitespace between words, removes newlines from a list, and removes duplicate items.
-
-    :param lst: The input list to be cleaned.
-    :return: A cleaned list with no extra whitespaces, newline characters, or duplicate items.
-    """
-    cleaned_lst = [' '.join(item.strip().split()) for item in lst]
-    cleaned_lst = list(set(cleaned_lst))
-    return [item for item in cleaned_lst if item]
-
-
-def clean_string(s: str) -> str:
-    """
-    Removes all but one whitespace between words and removes newlines from a string.
-
-    :param s: The input string to be cleaned.
-    :return: A cleaned string with no extra whitespaces or newline characters.
-    """
-    s = ' '.join(s.strip().split())
-    return s
+    if isinstance(input_obj, str):
+        return ' '.join(input_obj.strip().split())
+    elif isinstance(input_obj, dict):
+        return {k.strip(): v.strip() for k, v in input_obj.items() if v.strip()}
+    elif isinstance(input_obj, list):
+        return list(set([' '.join(item.strip().split()) for item in input_obj if item.strip()]))
+    else:
+        return input_obj
 
 
 def remove_html_tags(text):
@@ -46,3 +29,23 @@ def remove_html_tags(text):
     pattern = re.compile(r'<[^>]*>|&nbsp;|<img[^>"]+[^>]*')
     clean_text = re.sub(pattern, '', text)
     return clean_text
+
+
+def clean_html(soup) -> str:
+    """
+    Cleans an HTML string by removing img tags, replacing input tags with a placeholder, and removing &nbsp; entities.
+
+    :param soup: The HTML string to clean.
+    :return: The cleaned HTML string.
+    """
+
+    for img_tag in soup.find_all('img'):
+        img_tag.decompose()
+
+    for input_tag in soup.find_all('input'):
+        input_tag.replace_with('__________')
+
+    for nbsp_tag in soup.find_all(text=lambda t: t == '\xa0'):
+        nbsp_tag.string.replace_with('')
+
+    return '\n\n'.join(line.strip() for line in soup.get_text().split('\n') if line.strip())

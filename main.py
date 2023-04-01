@@ -5,9 +5,19 @@ import yaml
 from pathlib import Path
 from typing import Optional, Dict
 from bs4 import BeautifulSoup
+import time
 
-from utils.processes import ProcessMultipleAnswers, ProcessMatchingQuestions, ProcessMultipleChoice
+from utils.processor import ProcessQuestions
 from utils.quiz import Quiz, QuizFileGenerator
+
+"""
+fill_in_multiple_blanks (Quiz 1 && HW3)
+multiple_dropdowns_question (HW3)
+HW1 doesnt find a title
+
+TODO - Find the correct answers for Multiple Short Answer Questions (working in tester.py)
+
+"""
 
 
 def load_directory_paths() -> Dict[str, str]:
@@ -23,8 +33,10 @@ def create_directories(directories: dict) -> None:
 
 
 def find_quiz_title(soup: BeautifulSoup) -> Optional[str]:
-    quiz_title_tag = soup.find("h1", id="quiz_title")
-    return quiz_title_tag.text.strip() if quiz_title_tag else None
+    title_tag = soup.find("h1", id="quiz_title")
+    if not title_tag:
+        title_tag = soup.find("header", class_="quiz-header").find("h2")
+    return title_tag.text.strip() if title_tag else None
 
 
 def find_div_by_id(soup: BeautifulSoup, id_attr: str) -> Optional[BeautifulSoup]:
@@ -52,13 +64,11 @@ def process_files(args, directories: dict) -> None:
         questions_div = find_div_by_id(soup, "questions")
         quiz.number_of_questions = count_aria_labels(questions_div, "Question")
 
-        pmc = ProcessMultipleChoice(soup)
-        pmq = ProcessMatchingQuestions(soup)
-        pma = ProcessMultipleAnswers(soup)
+        processor = ProcessQuestions(soup)
 
-        quiz.multiple_choice_questions = pmc.process()
-        quiz.matching_questions = pmq.process()
-        quiz.multiple_answer_questions = pma.process()
+        quiz.multiple_choice_questions = processor.process_multiple_choice()
+        quiz.matching_questions = processor.process_matching()
+        quiz.multiple_answer_questions = processor.process_multiple_answers()
 
         qfg = QuizFileGenerator(quiz)
         output_file = output_dir / f"{quiz.title}"
@@ -79,8 +89,8 @@ def main():
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
     parser.add_argument(
         "-f", "--file_type", type=str, default="txt", nargs="+",
-        choices=["txt", "json", "yaml", "toml"],
-        help="The file type to save the quiz as. Options: txt, json, yaml, toml."
+        choices=["txt", "json", "yaml", "toml", "md"],
+        help="The file type to save the quiz as. Options: txt, md, json, yaml, toml."
     )
 
     exclusive_group = parser.add_mutually_exclusive_group()
@@ -107,4 +117,7 @@ def main():
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
+    end_time = time.time()
+    print(f"Elapsed time: {end_time - start_time:.2f} seconds")

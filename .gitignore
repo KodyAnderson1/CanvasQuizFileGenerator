@@ -131,5 +131,6 @@ dmypy.json
 # Added by author
 output/
 .idea/
-
+temp/
 *.html
+old_code/

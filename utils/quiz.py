@@ -4,13 +4,11 @@ import toml
 import json
 import yaml
 
-from utils.utils import remove_html_tags
-
-INITAL_HEADING = f"==========================================\n             QUIZ INFORMATION\n==========================================\n"
-MULTIPLE_CHOICE_HEADING = f"==========================================\n         MULTIPLE CHOICE QUESTIONS\n==========================================\n\n"
-MULTIPLE_ANSWERS_HEADING = f"==========================================\n        MULTIPLE ANSWER QUESTIONS\n==========================================\n\n"
-MATCHING_QUESTIONS_HEADING = f"==========================================\n             MATCHING QUESTIONS\n==========================================\n\n"
-DASHES_WITH_NEWLINES = "\n--------------------------------\n\n"
+INITAL_HEADING = f"{'=' * 42}\n{' ' * 13}QUIZ INFORMATION\n{'=' * 42}\n"
+MULTIPLE_CHOICE_HEADING = f"{'=' * 42}\n{' ' * 10}MULTIPLE CHOICE QUESTIONS\n{'=' * 42}\n\n"
+MULTIPLE_ANSWERS_HEADING = f"{'=' * 42}\n{' ' * 9}MULTIPLE ANSWER QUESTIONS\n{'=' * 42}\n\n"
+MATCHING_QUESTIONS_HEADING = f"{'=' * 42}\n{' ' * 14}MATCHING QUESTIONS\n{'=' * 42}\n\n"
+DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"
 
 
 class Quiz:
@@ -64,15 +62,15 @@ class Quiz:
                 text_file.write(MULTIPLE_CHOICE_HEADING)
 
             for mcq in self.multiple_choice_questions:
-                question = remove_html_tags(mcq.question)
+                question = mcq.question
                 choices = "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(mcq.choices)])
                 answer = mcq.answer
 
                 text_file.write(f"{question}\n"
                                 f"{choices}\n\nAnswer: {answer}{DASHES_WITH_NEWLINES}")
 
-            if len(self.matching_questions) > 0:
-                text_file.write(MULTIPLE_ANSWERS_HEADING)
+            if len(self.multiple_answer_questions) > 0:
+                text_file.write(MATCHING_QUESTIONS_HEADING)
 
             for maq in self.multiple_answer_questions:
                 question = maq.question
@@ -81,8 +79,8 @@ class Quiz:
 
                 text_file.write(f"{question}\n{choices}\n\nAnswer(s): {answers}{DASHES_WITH_NEWLINES}")
 
-            if len(self.multiple_answer_questions) > 0:
-                text_file.write(MATCHING_QUESTIONS_HEADING)
+            if len(self.matching_questions) > 0:
+                text_file.write(MULTIPLE_ANSWERS_HEADING)
 
             for mq in self.matching_questions:
                 question = mq.question
@@ -92,6 +90,62 @@ class Quiz:
 
                 text_file.write(f"{question}\n\nAnswer Bank:\n{answer_bank}\n\n"
                                 f"Word Bank:\n{word_bank}\n\nAnswers:\n{answers}{DASHES_WITH_NEWLINES}")
+
+    def write_markdown_file(self, file_name: str):
+        """
+        Write the Quiz object to a text file with the specified file name.
+
+        :param file_name: The name of the text file to write.
+        """
+        dashes = f"\n\n{'-' * 3}\n"
+        initial_heading = "QUIZ INFORMATION"
+
+        with open(file_name, 'w', encoding='utf-8') as text_file:
+
+            text_file.write(f"# {initial_heading}")
+            text_file.write(
+                f"\nTitle: {self.title}\n\nNumber of questions: {self.number_of_questions}\n")
+            if len(self.multiple_choice_questions) > 0:
+                text_file.write(f"\nNumber of [multiple choice questions](#multiple-choice-questions):"
+                                f" {len(self.multiple_choice_questions)}\n")
+            if len(self.matching_questions) > 0:
+                text_file.write(f"\nNumber of [matching questions](#matching-questions): "
+                                f"{len(self.matching_questions)}\n")
+            if len(self.multiple_answer_questions) > 0:
+                text_file.write(f"\nNumber of [multiple answers questions](#multiple-answers-questions): "
+                                f"{len(self.multiple_answer_questions)}\n")
+
+            text_file.write(f"\n{dashes}\n")
+
+            if len(self.multiple_choice_questions) > 0:
+                text_file.write("## Multiple Choice Questions\n\n")
+
+            for mcq in self.multiple_choice_questions:
+                question = mcq.question
+                choices = "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(mcq.choices)])
+                answer = mcq.answer
+                text_file.write(f"#### {question}\n" f"{choices}\n\n##### _Answer:_ {answer}\n{dashes}\n")
+
+            if len(self.multiple_answer_questions) > 0:
+                text_file.write("## Multiple Answers Questions\n\n")
+
+            for maq in self.multiple_answer_questions:
+                question = f"\n### {maq.question}"
+                choices = "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(maq.choices)])
+                answers = "\n".join([f"- {choice}" for choice in maq.answers])
+                text_file.write(f"{question}\n{choices}\n\n#### Answer(s):\n\n{answers}{dashes}\n")
+
+            if len(self.matching_questions) > 0:
+                text_file.write("## Matching Questions\n\n")
+
+            for mq in self.matching_questions:
+                question = f"\n### {mq.question}"
+                answer_bank = "\n".join([f"{i + 1}. {answer}" for i, answer in enumerate(mq.answer_bank)])
+                word_bank = "\n".join([f"{i + 1}. {word}" for i, word in enumerate(mq.word_bank)])
+                answers = "\n".join([f"- **{key}** : {value}" for key, value in mq.answers.items()])
+
+                text_file.write(f"{question}\n\n#### Answer Bank:\n{answer_bank}\n\n"
+                                f"#### Word Bank:\n{word_bank}\n\n#### Answers:\n{answers}{dashes}\n")
 
     def write_toml_file(self, file_name: str):
         """
@@ -120,6 +174,22 @@ class Quiz:
         """
         with open(file_name, 'w', encoding='utf-8') as json_file:
             json.dump(self.to_dict(), json_file, ensure_ascii=False, indent=4)
+
+
+class MultipleShortAnswerQuestion:
+    """
+    A class representing a multiple short answer question.
+
+    :param question: The text of the question
+    :param answers: A list of correct answers to the question
+    """
+
+    def __init__(self, question: str = "", answers: List[str] = []):
+        self.question: str = question
+        self.answers: List[str] = answers
+
+    def __repr__(self):
+        return f"\nQuestion = {self.question}\nAnswers =\n{self.answers}\n"
 
 
 class MultipleAnswersQuestion:
@@ -198,6 +268,7 @@ class QuizFileGenerator:
             "json": self.quiz.write_json_file,
             "yaml": self.quiz.write_yaml_file,
             "toml": self.quiz.write_toml_file,
+            "md": self.quiz.write_markdown_file,
         }
 
         for file_type in file_types:
