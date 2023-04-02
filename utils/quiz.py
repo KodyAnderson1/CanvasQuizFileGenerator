@@ -11,6 +11,7 @@ from utils.questions import (
 )
 from utils.utils import insert_newlines
 
+# Constants
 BETA_MESSAGE = " **This section is still being tested. Please report any bugs.**"
 BETA_CLASSES = [MultipleShortAnswerQuestion]
 
@@ -24,6 +25,8 @@ HEADINGS = {
 
 DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"
 NEWLINE = "\n"
+
+QUESTION_FORMAT_TUPLE = (MultipleShortAnswerQuestion, MultipleAnswersQuestion)
 
 
 def write_question_summary(questions: list, heading_text: str) -> str:
@@ -153,7 +156,7 @@ class QuizWriter:
                             word_bank = format_choices(q.word_bank)
                             choices = f"Answer Bank:\n{answer_bank}\n\nWord Bank:\n{word_bank}\n"
 
-                        if isinstance(q, MultipleShortAnswerQuestion):
+                        if isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
                         answer = format_answers(q)
@@ -214,7 +217,7 @@ class QuizWriter:
                             word_bank = format_choices(q.word_bank)
                             choices = f"#### Answer Bank:\n{answer_bank}\n\n#### Word Bank:\n{word_bank}\n"
 
-                        if isinstance(q, MultipleShortAnswerQuestion):
+                        if isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
                         answer = format_answers(q)

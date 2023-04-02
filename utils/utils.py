@@ -71,6 +71,7 @@ def clean_html(html_string) -> str:
 def insert_newlines(text: str) -> str:
     """
     Inserts a newline after periods and question marks in the input text, unless they are inside parentheses.
+    However, does not insert newline if the period is followed by 'i.e.' or 'e.g.'
 
     :param text: The input string.
     :return: The modified string with newlines inserted.
@@ -78,16 +79,26 @@ def insert_newlines(text: str) -> str:
     result = []
     parenthesis_count = 0
 
-    for char in text:
-        if char == '(':
-            parenthesis_count += 1
-        elif char == ')':
-            parenthesis_count -= 1
-        elif char in '.!?' and parenthesis_count == 0:
-            result.append(char)
-            result.append('\n')
-            continue
+    # Split the text into tokens
+    tokens = text.split()
 
-        result.append(char)
+    for i, token in enumerate(tokens):
+        if token == '(':
+            parenthesis_count += 1
+        elif token == ')':
+            parenthesis_count -= 1
+        elif token.endswith(('.', '!', '?')) and parenthesis_count == 0:
+            # Check if the next token is 'i.e.' or 'e.g.'
+            next_token = tokens[i + 1] if i + 1 < len(tokens) else ''
+            if not next_token.lower() in ['i.e.', 'e.g.']:
+                result.append(token)
+                result.append('\n')
+                continue
+
+        result.append(token)
+
+        if i < len(tokens) - 1:
+            # Append a space between tokens
+            result.append(' ')
 
     return ''.join(result)
