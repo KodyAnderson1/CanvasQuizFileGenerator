@@ -23,8 +23,8 @@ def main():
     directories = load_directory_paths()
     raw_html_dir = Path(directories["raw_html"])
 
-    # file_to_parse = os.path.join(raw_html_dir, "Quiz 1- Requires Respondus LockDown Browser.html")
-    file_to_parse = os.path.join(raw_html_dir, "Homework 3 Results for Anthony Welter.html")
+    file_to_parse = os.path.join(raw_html_dir, "Quiz 1- Requires Respondus LockDown Browser.html")
+    # file_to_parse = os.path.join(raw_html_dir, "Homework 3 Results for Anthony Welter.html")
 
     with open(file_to_parse, "r", encoding="utf-8") as file:
         html_content = file.read()
@@ -34,8 +34,8 @@ def main():
 
     answ = process_multiple_short_answer(soup)
 
-    for a in answ:
-        print(a.answers)
+    # for a in answ:
+    #     print(a.question)
 
 
 def process_multiple_short_answer(soup: BeautifulSoup) -> list[MultipleShortAnswerQuestion]:

@@ -1,18 +1,18 @@
 from pathlib import Path
 from typing import List, Union
-import toml
 import json
 import yaml
 
-from utils.question_classes import (
+from utils.questions import (
     MultipleShortAnswerQuestion,
     MultipleChoiceQuestion,
     MultipleAnswersQuestion,
     MatchingQuestion,
 )
+from utils.utils import insert_newlines
 
-BETA_MESSAGE = " **This section is still in beta. Please report any bugs.**"
-BETA_CLASSES = [MultipleAnswersQuestion, MultipleShortAnswerQuestion, MatchingQuestion, MultipleChoiceQuestion]
+BETA_MESSAGE = " **This section is still being tested. Please report any bugs.**"
+BETA_CLASSES = [MultipleShortAnswerQuestion]
 
 HEADINGS = {
     "initial": ("=" * 42) + "\n" + (" " * 13) + "QUIZ INFORMATION\n" + ("=" * 42) + "\n",
@@ -108,10 +108,25 @@ class QuizWriter:
         :param file_name: The name of the text file to write.
         """
 
-        with open(file_name, 'w', encoding='utf-8') as text_file:
+        def format_choices(choices_list):
+            return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices_list)])
 
-            mcq, mq = self.quiz.multiple_choice_questions, self.quiz.matching_questions
-            maq, msaq = self.quiz.multiple_answer_questions, self.quiz.multiple_short_answer_questions
+        def format_answers(q):
+            if isinstance(q, MatchingQuestion):
+                return f"Answers:\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+            elif isinstance(q, MultipleShortAnswerQuestion):
+                return f"Answer(s): {f', '.join(q.answers)}"
+            elif isinstance(q, MultipleChoiceQuestion):
+                return f"Answer: {q.answer}"
+            elif isinstance(q, MultipleAnswersQuestion):
+                return f"Answer(s): \n{f'{NEWLINE}'.join(q.answers)}"
+            else:
+                return ""
+
+        with open(file_name, 'w', encoding='utf-8') as text_file:
+            quiz = self.quiz
+            mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
+            maq, msaq = quiz.multiple_answer_questions, quiz.multiple_short_answer_questions
             sections = [
                 (len(mcq), HEADINGS["multiple_choice"], "multiple choice questions", mcq),
                 (len(mq), HEADINGS["matching"], "matching questions", mq),
@@ -120,7 +135,7 @@ class QuizWriter:
             ]
 
             text_file.write(HEADINGS["initial"])
-            text_file.write(f"Title: {self.quiz.title}\n\nNumber of questions: {self.quiz.number_of_questions}\n")
+            text_file.write(f"Title: {quiz.title}\n\nNumber of questions: {quiz.number_of_questions}\n")
 
             for count, heading, heading_text, questions in sections:
                 if count > 0:
@@ -131,22 +146,17 @@ class QuizWriter:
                     text_file.write(heading)
                     for q in questions:
                         question = q.question
+                        choices = format_choices(q.choices) if hasattr(q, 'choices') else ""
 
                         if isinstance(q, MatchingQuestion):
-                            answer_bank = "\n".join([f"{i + 1}. {answer}" for i, answer in enumerate(q.answer_bank)])
-                            word_bank = "\n".join([f"{i + 1}. {word}" for i, word in enumerate(q.word_bank)])
+                            answer_bank = format_choices(q.answer_bank)
+                            word_bank = format_choices(q.word_bank)
                             choices = f"Answer Bank:\n{answer_bank}\n\nWord Bank:\n{word_bank}\n"
-                            answer = f"Answers:\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
-                        elif isinstance(q, MultipleShortAnswerQuestion):
-                            choices = ""
-                            answer = f"Answer(s): {f', '.join(q.answers)}"
-                        else:
-                            choices = "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(q.choices)])
-                            if isinstance(q, MultipleChoiceQuestion):
-                                answer = f"Answer: {q.answer}"
-                            elif isinstance(q, MultipleAnswersQuestion):
-                                answer = f"Answer(s): \n{f'{NEWLINE}'.join(q.answers)}"
 
+                        if isinstance(q, MultipleShortAnswerQuestion):
+                            question = insert_newlines(q.question)
+
+                        answer = format_answers(q)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{DASHES_WITH_NEWLINES}"])
 
     def write_markdown_file(self, file_name: str):
@@ -155,13 +165,28 @@ class QuizWriter:
 
         :param file_name: The name of the text file to write.
         """
+
+        def format_choices(choices):
+            return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices)])
+
+        def format_answers(q):
+            if isinstance(q, MatchingQuestion):
+                return f"#### _Answer(s):_{NEWLINE}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
+            elif isinstance(q, MultipleShortAnswerQuestion):
+                return f"#### _Answer(s):_ {f', '.join(q.answers)}"
+            elif isinstance(q, MultipleChoiceQuestion):
+                return f"#### _Answer(s):_ {q.answer}"
+            elif isinstance(q, MultipleAnswersQuestion):
+                return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
+            else:
+                return ""
+
         dashes = f"\n\n{'-' * 3}\n\n"
-        answ_heading = "#### _Answer(s):_"
 
         with open(file_name, 'w', encoding='utf-8') as text_file:
-
-            mcq, mq = self.quiz.multiple_choice_questions, self.quiz.matching_questions
-            maq, msaq = self.quiz.multiple_answer_questions, self.quiz.multiple_short_answer_questions
+            quiz = self.quiz
+            mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
+            maq, msaq = quiz.multiple_answer_questions, quiz.multiple_short_answer_questions
             sections = [
                 (len(mcq), "Multiple Choice Questions", mcq),
                 (len(mq), "Matching Questions", mq),
@@ -169,7 +194,7 @@ class QuizWriter:
                 (len(msaq), "Multiple Short Answer Questions", msaq)
             ]
 
-            text_file.write(f"# {self.quiz.title}\n\n- Number of questions: {self.quiz.number_of_questions}\n")
+            text_file.write(f"# {quiz.title}\n\n- Number of questions: {quiz.number_of_questions}\n")
 
             for count, heading, questions in sections:
                 if count > 0:
@@ -182,22 +207,17 @@ class QuizWriter:
                     text_file.write(f"## {heading}\n")
                     for q in questions:
                         question = f"#### {q.question}"
+                        choices = format_choices(q.choices) if hasattr(q, 'choices') else ""
 
                         if isinstance(q, MatchingQuestion):
-                            answer_bank = "\n".join([f"{i + 1}. {answer}" for i, answer in enumerate(q.answer_bank)])
-                            word_bank = "\n".join([f"{i + 1}. {word}" for i, word in enumerate(q.word_bank)])
+                            answer_bank = format_choices(q.answer_bank)
+                            word_bank = format_choices(q.word_bank)
                             choices = f"#### Answer Bank:\n{answer_bank}\n\n#### Word Bank:\n{word_bank}\n"
-                            answer = f"{answ_heading}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
-                        elif isinstance(q, MultipleShortAnswerQuestion):
-                            choices = f"{BETA_MESSAGE}"
-                            answer = f"{answ_heading} {f', '.join(q.answers)}"
-                        else:
-                            choices = "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(q.choices)])
-                            if isinstance(q, MultipleChoiceQuestion):
-                                answer = f"{answ_heading} {q.answer}"
-                            elif isinstance(q, MultipleAnswersQuestion):
-                                answer = f'{answ_heading}{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
 
+                        if isinstance(q, MultipleShortAnswerQuestion):
+                            question = insert_newlines(q.question)
+
+                        answer = format_answers(q)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{dashes}"])
 
     def write_yaml_file(self, file_name: str):

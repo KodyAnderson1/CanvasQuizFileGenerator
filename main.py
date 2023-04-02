@@ -11,12 +11,7 @@ from utils.processor import ProcessQuestions
 from utils.quiz import Quiz, QuizWriter
 
 """
-fill_in_multiple_blanks (Quiz 1 && HW3)
 multiple_dropdowns_question (HW3)
-HW1 doesnt find a title
-
-TODO - Find the correct answers for Multiple Short Answer Questions (working in tester.py)
-Reason why answer order is being changed is because they are being added to a set, which is unordered. Then converted back to a list.
 
 """
 
@@ -48,35 +43,46 @@ def count_aria_labels(soup: BeautifulSoup, label_name: str) -> Optional[int]:
     return len(soup.find_all(attrs={"aria-label": label_name})) if soup else None
 
 
+def read_html_file(file_path: Path) -> str:
+    with open(file_path, "r", encoding="utf-8") as file:
+        html_content = file.read()
+    return html_content
+
+
+def parse_html(html_content: str) -> BeautifulSoup:
+    return BeautifulSoup(html_content, "html.parser")
+
+
+def process_quiz(soup: BeautifulSoup) -> Quiz:
+    quiz = Quiz()
+
+    quiz.title = find_quiz_title(soup)
+    questions_div = find_div_by_id(soup, "questions")
+    quiz.number_of_questions = count_aria_labels(questions_div, "Question")
+
+    processor = ProcessQuestions(soup)
+
+    quiz.multiple_choice_questions = processor.process_multiple_choice()
+    quiz.matching_questions = processor.process_matching()
+    quiz.multiple_answer_questions = processor.process_multiple_answers()
+    quiz.multiple_short_answer_questions = processor.process_multiple_short_answers()
+
+    return quiz
+
+
 def process_files(args, directories: dict) -> None:
     raw_html_dir = Path(directories["raw_html"])
     parsed_html_dir = Path(directories["parsed_html"])
     output_dir = Path(directories["output"])
 
     for raw_html_file in raw_html_dir.glob("*.html"):
-        quiz = Quiz()
+        html_content = read_html_file(raw_html_file)
+        soup = parse_html(html_content)
+        quiz = process_quiz(soup)
 
-        with open(raw_html_file, "r", encoding="utf-8") as file:
-            html_content = file.read()
-
-        soup = BeautifulSoup(html_content, "html.parser")
-
-        quiz.title = find_quiz_title(soup)
-        questions_div = find_div_by_id(soup, "questions")
-        quiz.number_of_questions = count_aria_labels(questions_div, "Question")
-
-        processor = ProcessQuestions(soup)
-
-        quiz.multiple_choice_questions = processor.process_multiple_choice()
-        quiz.matching_questions = processor.process_matching()
-        quiz.multiple_answer_questions = processor.process_multiple_answers()
-        quiz.multiple_short_answer_questions = processor.process_multiple_short_answers()
-
-        # print(quiz.multiple_short_answer_questions)
-
-        qfg = QuizWriter(quiz)
+        wq = QuizWriter(quiz)
         output_file = output_dir / f"{quiz.title}"
-        qfg.write(args.file_type, output_file)
+        wq.write(args.file_type, output_file)
 
         new_html_file = parsed_html_dir / f"{quiz.title}.html"
         if args.remove_html:

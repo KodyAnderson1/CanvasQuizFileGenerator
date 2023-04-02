@@ -14,8 +14,8 @@ def get_question_text(soup: BeautifulSoup) -> str:
     :param soup: A BeautifulSoup object containing a multiple answer question.
     :return: The question text for the multiple answer question.
     """
-    question_textarea = soup.find("textarea", {"name": "question_text"}).text
-    return remove_html_tags(clean_input(question_textarea))
+    question_textarea = soup.find("textarea", {"name": "question_text"})
+    return remove_html_tags(clean_input(clean_html(question_textarea)))
 
 
 def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:

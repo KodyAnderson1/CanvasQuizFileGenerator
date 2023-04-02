@@ -1,5 +1,8 @@
-from typing import Dict, List
+from html import unescape
+from typing import List
 import re
+
+from bs4 import BeautifulSoup, Tag
 
 
 def clean_input(input_obj):
@@ -36,22 +39,55 @@ def remove_html_tags(text):
     return clean_text
 
 
-def clean_html(soup) -> str:
+def clean_html(html_string) -> str:
     """
     Cleans an HTML string by removing img tags, replacing input tags with a placeholder, and removing &nbsp; entities.
 
-    :param soup: The HTML string to clean.
+    :param html_string: The HTML string to clean.
     :return: The cleaned HTML string.
     """
+    if not isinstance(html_string, Tag) or html_string.text == '':
+        return html_string
 
+    # Parse the HTML string with Beautiful Soup
+    soup = BeautifulSoup(unescape(str(html_string)), 'html.parser')
+
+    # Remove <img> tags
     for img_tag in soup.find_all('img'):
         img_tag.decompose()
 
+    # Replace <input> tags with a placeholder
     for input_tag in soup.find_all('input'):
         input_tag.replace_with('__________')
 
+    # Remove &nbsp; entities
     for nbsp_tag in soup.find_all(text=lambda t: t == '\xa0'):
         nbsp_tag.string.replace_with('')
 
-    # print(soup)
-    return '\n\n'.join(line.strip() for line in soup.get_text().split('\n') if line.strip())
+    # Get the text content of the modified HTML and return it
+    return ' '.join(line.strip() for line in soup.get_text().split() if line.strip())
+
+
+def insert_newlines(text: str) -> str:
+    """
+    Inserts a newline after periods and question marks in the input text, unless they are inside parentheses.
+
+    :param text: The input string.
+    :return: The modified string with newlines inserted.
+    """
+    result = []
+    parenthesis_count = 0
+
+    for char in text:
+        if char == '(':
+            parenthesis_count += 1
+        elif char == ')':
+            parenthesis_count -= 1
+        elif char in '.!?' and parenthesis_count == 0:
+            result.append(char)
+            result.append('\n')
+            continue
+
+        result.append(char)
+
+    return ''.join(result)
