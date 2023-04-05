@@ -66,7 +66,7 @@ based on the specified file type(s).
 To use this script, run the following command:
 
 ```bash
-python main.py [-h] [-rm | -dm] [-f {txt,md,json,yaml,toml} [{txt,md,json,yaml,toml} ...]]
+python main.py [-h] [-rm | -dm] [-f {txt,md,json,yaml} [{txt,md,json,yaml} ...]]
 ```
 
 Here are the available flags:
