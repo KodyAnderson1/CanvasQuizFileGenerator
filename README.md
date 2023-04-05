@@ -22,8 +22,8 @@ identification.
 
 This project was made help to parse, create, and save quizzes in different file formats, such as text, markdown, JSON,
 YAML, and TOML from a Canvas `.html` file. The `.html` needs to be the quiz itself, not a submission page or any other
-page that "loads" the quiz in as a secondary item. **Currently, will only output multiple choice, matching and multiple
-answer (selection box) questions**
+page that "loads" the quiz in as a secondary item. **Currently, will only output multiple choice, matching, multiple
+answer (selection box), and multiple short answer questions**
 
 ## Table of Contents
 
