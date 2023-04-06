@@ -98,9 +98,9 @@ def process_files(args, directories: dict) -> None:
 def main():
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
     parser.add_argument(
-        "-f", "--file_type", type=str, default="txt", nargs="+",
-        choices=["txt", "json", "yaml", "md"],
-        help="The file type to save the quiz as. Options: txt, md, json, yaml."
+        "-f", "--file_type", type=str, default="qz.txt", nargs="+",
+        choices=["txt", "json", "yaml", "md", "qz.txt"],
+        help="The file type to save the quiz as. Options: txt, md, json, yaml, qz.txt."
     )
 
     exclusive_group = parser.add_mutually_exclusive_group()

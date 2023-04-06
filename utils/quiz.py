@@ -94,6 +94,7 @@ class QuizWriter:
             "json": self.write_json_file,
             "yaml": self.write_yaml_file,
             "md": self.write_markdown_file,
+            "qz.txt": self.write_quizlet_file
         }
 
         for file_type in file_types:
@@ -162,6 +163,7 @@ class QuizWriter:
                         answer = format_answers(q)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{DASHES_WITH_NEWLINES}"])
 
+
     def write_markdown_file(self, file_name: str):
         """
         Write the Quiz object to a markdown file with the specified file name.
@@ -222,6 +224,67 @@ class QuizWriter:
 
                         answer = format_answers(q)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{dashes}"])
+
+    def write_quizlet_file(self, file_name: str):
+        """
+        Write the Quiz object to a text file with the specified file name and a format for easy quizlet import
+
+        :param file_name: The name of the text file to write.
+        """
+        TERM_DEFINITION_DELIMITER = "\\btd\n"
+        BETWEEN_CARDS_DELIMITER = "\n\\bc\n"
+
+        def format_choices(choices_list):
+            return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices_list)])
+
+        def format_answers(q):
+            if isinstance(q, MatchingQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+            elif isinstance(q, MultipleShortAnswerQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
+            elif isinstance(q, MultipleChoiceQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{q.answer}"
+            elif isinstance(q, MultipleAnswersQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
+            else:
+                return ""
+
+        with open(file_name, 'w', encoding='utf-8') as text_file:
+            quiz = self.quiz
+            mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
+            maq, msaq = quiz.multiple_answer_questions, quiz.multiple_short_answer_questions
+            sections = [
+                (len(mcq), HEADINGS["multiple_choice"], "multiple choice questions", mcq),
+                (len(mq), HEADINGS["matching"], "matching questions", mq),
+                (len(maq), HEADINGS["multiple_answers"], "multiple answers questions", maq),
+                (len(msaq), HEADINGS["multiple_short_answers"], "multiple short answer questions", msaq)
+            ]
+
+            # text_file.write(HEADINGS["initial"])
+            # text_file.write(f"Title: {quiz.title}\n\nNumber of questions: {quiz.number_of_questions}\n")
+
+            # for count, heading, heading_text, questions in sections:
+            #     if count > 0:
+            #         text_file.write(write_question_summary(questions, heading_text))
+
+            for count, heading, heading_text, questions in sections:
+                if count > 0:
+                    # text_file.write(heading)
+                    for q in questions:
+                        question = q.question
+                        choices = format_choices(q.choices) if hasattr(q, 'choices') else ""
+
+                        if isinstance(q, MatchingQuestion):
+                            answer_bank = format_choices(q.answer_bank)
+                            word_bank = format_choices(q.word_bank)
+                            choices = f"Answer Bank:\n{answer_bank}\n\nWord Bank:\n{word_bank}\n"
+
+                        if isinstance(q, QUESTION_FORMAT_TUPLE):
+                            question = insert_newlines(q.question)
+
+                        answer = format_answers(q)
+                        text_file.writelines([f"{question}\n\n{choices}\n{answer}{BETWEEN_CARDS_DELIMITER}"])
+
 
     def write_yaml_file(self, file_name: str):
         """
