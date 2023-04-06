@@ -2,7 +2,7 @@
 
 ## NOW WITH QUIZLET IMPORT SUPPORT
 
-- The default format this saves with now is `qz.txt` which is a format intended to copy and paste directly into the import feature on a quizlet study set.
+- The default format this project saves now is `qz.txt` which is a format intended to copy and paste directly into the import feature on a quizlet study set.
 - At the moment, the delimiters are hard-coded, but future iterations of the project will probably include a flag to determine them yourself.
 - On the import screen...
   - For `Between term and definition` click custom and enter `\btd`
