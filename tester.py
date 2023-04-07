@@ -19,6 +19,37 @@ def load_directory_paths() -> Dict[str, str]:
     return paths["directory_paths"]
 
 
+def remove_href_src(html_content):
+    allowed_tags = bleach.sanitizer.ALLOWED_TAGS
+    allowed_attrs = {
+        'a': ['target', 'title'],
+        'img': ['alt', 'src'],
+        'div': ['class'],
+    }
+    allowed_protocols = list(bleach.sanitizer.ALLOWED_PROTOCOLS) + ['data']
+    no_href_src_html = bleach.clean(
+        html_content,
+        tags=allowed_tags,
+        attributes=allowed_attrs,
+        protocols=allowed_protocols,
+        strip=True,
+    )
+    return no_href_src_html
+
+    return no_href_src_html
+
+
+def count_images(html_content):
+    # Parse the HTML content using Beautiful Soup
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all <img> tags in the HTML
+    img_tags = soup.find_all('img')
+
+    # Return the count of <img> tags
+    return len(img_tags)
+
+
 def main():
     directories = load_directory_paths()
     raw_html_dir = Path(directories["raw_html"])
@@ -29,10 +60,14 @@ def main():
     with open(file_to_parse, "r", encoding="utf-8") as file:
         html_content = file.read()
 
-    soup = BeautifulSoup(html_content, "html.parser")
+    # soup = BeautifulSoup(html_content, "html.parser")
+
+    print(count_images(html_content))
+
+    # print(remove_head(soup))
     # print(count_aria_labels(find_div_by_id(soup, "questions"), "Question"))
 
-    answ = process_multiple_short_answer(soup)
+    # answ = process_multiple_short_answer(soup)
 
     # for a in answ:
     #     print(a.question)
@@ -48,6 +83,22 @@ def process_multiple_short_answer(soup: BeautifulSoup) -> list[MultipleShortAnsw
     return [MultipleShortAnswerQuestion(question=get_question_text(div),
                                         answers=text_by_filter(div, "answer_group", "answer_text"))
             for div in find_elements_by_class(soup, "fill_in_multiple_blanks_question")]
+
+
+def remove_head(soup):
+    # Remove the <head> tag and all its contents
+    head_tag = soup.find('head')
+    if head_tag:
+        head_tag.extract()
+
+    # Remove all <script> tags and their contents
+    for script_tag in soup.find_all('script'):
+        script_tag.extract()
+
+    # Extract the cleaned HTML content
+    cleaned_html = soup.prettify()
+
+    return cleaned_html
 
 
 if __name__ == "__main__":
