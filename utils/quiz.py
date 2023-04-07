@@ -163,7 +163,6 @@ class QuizWriter:
                         answer = format_answers(q)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{DASHES_WITH_NEWLINES}"])
 
-
     def write_markdown_file(self, file_name: str):
         """
         Write the Quiz object to a markdown file with the specified file name.
@@ -260,16 +259,8 @@ class QuizWriter:
                 (len(msaq), HEADINGS["multiple_short_answers"], "multiple short answer questions", msaq)
             ]
 
-            # text_file.write(HEADINGS["initial"])
-            # text_file.write(f"Title: {quiz.title}\n\nNumber of questions: {quiz.number_of_questions}\n")
-
-            # for count, heading, heading_text, questions in sections:
-            #     if count > 0:
-            #         text_file.write(write_question_summary(questions, heading_text))
-
             for count, heading, heading_text, questions in sections:
                 if count > 0:
-                    # text_file.write(heading)
                     for q in questions:
                         question = q.question
                         choices = format_choices(q.choices) if hasattr(q, 'choices') else ""
@@ -284,7 +275,6 @@ class QuizWriter:
 
                         answer = format_answers(q)
                         text_file.writelines([f"{question}\n\n{choices}\n{answer}{BETWEEN_CARDS_DELIMITER}"])
-
 
     def write_yaml_file(self, file_name: str):
         """
