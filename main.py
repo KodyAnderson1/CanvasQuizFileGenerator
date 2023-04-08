@@ -95,36 +95,53 @@ def process_files(args, directories: dict) -> None:
 
 
 def main():
+    file_choices = ["txt", "json", "yaml", "md", "qz.txt"]
+    default_file = "qz.txt"
+
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
     parser.add_argument(
-        "-f", "--file_type", type=str, default="qz.txt", nargs="+",
-        choices=["txt", "json", "yaml", "md", "qz.txt"],
-        help="The file type to save the quiz as. Options: txt, md, json, yaml, qz.txt."
+        "-f", "--file_type", type=str, default=default_file, nargs="+",
+        choices=file_choices,
+        help=f"File type to save the quiz as. Options: {', '.join(file_choices)}."
     )
 
     exclusive_group = parser.add_mutually_exclusive_group()
 
     exclusive_group.add_argument(
         "-rm", "--remove_html", action="store_true",
-        help="Flag to remove the HTML files instead of renaming and moving them. "
-             "Selecting this flag will prevent the use of the -dm flag."
+        help="Remove HTML files instead of renaming and moving them. Cannot use with -dm flag."
     )
 
     exclusive_group.add_argument(
         "-dm", "--dont_move", action="store_true",
-        help="Flag to keep .html files in the origin directory with their original names. "
-             "Selecting this flag will prevent the use of the -rm flag."
+        help="Keep .html files in origin directory with original names. Cannot use with -rm flag."
     )
 
     parser.add_argument(
         "-c", "--cores", type=int, default=os.cpu_count() // 2,
-        help="The number of CPU cores to use for processing. Default is half the available cores."
+        help="Number of CPU cores for processing. Default is half the available cores."
     )
+
+    # parser.add_argument(
+    #     "-btd", "--between_term_definition", type=str, default=global_variables.QUIZLET_TERM_DEFINITION_DELIMITER,
+    #     help=f"Delimiter between term and definition. Default is '{global_variables.QUIZLET_TERM_DEFINITION_DELIMITER}'"
+    # )
+    #
+    # parser.add_argument(
+    #     "-bc", "--between_cards", type=str, default=global_variables.QUIZLET_CARDS_DELIMITER,
+    #     help=f"Delimiter between cards. Default is '{global_variables.QUIZLET_CARDS_DELIMITER}'"
+    # )
 
     args = parser.parse_args()
 
-    # Make sure the number of cores is at least 1 and not greater than the total number of cores
+    # Ensure the number of cores is between 1 and the total number of cores
     args.cores = max(min(args.cores, os.cpu_count()), 1)
+
+    # print(args.between_term_definition)
+    # print(args.between_cards)
+    #
+    # global_variables.QUIZLET_TERM_DEFINITION_DELIMITER = args.between_term_definition
+    # global_variables.QUIZLET_CARDS_DELIMITER = args.between_cards
 
     directories = load_directory_paths()
 

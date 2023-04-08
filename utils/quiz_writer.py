@@ -23,6 +23,8 @@ BETA_CLASSES = [MultipleShortAnswerQuestion]
 DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"
 NEWLINE = "\n"
 QUESTION_FORMAT_TUPLE = (MultipleShortAnswerQuestion, MultipleAnswersQuestion)
+QUIZLET_TERM_DEFINITION_DELIMITER = "\\btd"
+QUIZLET_CARDS_DELIMITER = "\\bc"
 
 
 def format_choices(choices_list):
@@ -172,9 +174,6 @@ class QuizletQuizFileWriter(QuizFileWriter):
         :param file_path: The name of the text file to write.
         """
 
-        TERM_DEFINITION_DELIMITER = "\\btd\n"
-        BETWEEN_CARDS_DELIMITER = "\n\\bc\n"
-
         with open(file_path, 'w', encoding='utf-8') as text_file:
             quiz = self.quiz
             mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
@@ -201,22 +200,21 @@ class QuizletQuizFileWriter(QuizFileWriter):
                             question = insert_newlines(q.question)
 
                         answer = self.format_answers(q)
-                        text_file.writelines([f"{question}\n\n{choices}\n{answer}{BETWEEN_CARDS_DELIMITER}"])
+                        text_file.writelines(
+                            [f"{question}\n\n{choices}\n{answer}\n{QUIZLET_CARDS_DELIMITER}\n"])
 
     @staticmethod
     def format_answers(q):
-        TERM_DEFINITION_DELIMITER = "\\btd\n"
-        BETWEEN_CARDS_DELIMITER = "\n\\bc\n"
 
         if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
             if isinstance(q, MatchingQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
             elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{f', '.join(q.answers)}"
             elif isinstance(q, MultipleChoiceQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{q.answer}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{q.answer}"
             elif isinstance(q, MultipleAnswersQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{f'{NEWLINE}'.join(q.answers)}"
         return ""
 
 
