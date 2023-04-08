@@ -4,7 +4,7 @@
 Title: Quiz 1- Requires Respondus LockDown Browser
 
 Number of questions: 15
-Number of multiple choice questions: 11
+Number of multiple choice questions: 12
 Number of matching questions: 1
 Number of multiple answers questions: 1
 Number of multiple short answer questions: 1 **This section is still being tested. Please report any bugs.**
@@ -36,6 +36,13 @@ __________ is a columnar storage format.
 3. ORC
 
 Answer: ORC
+--------------------------------
+
+Each file in HDFS is divided into multiple partitions
+1. True
+2. False
+
+Answer: True
 --------------------------------
 
 Columnar storage:

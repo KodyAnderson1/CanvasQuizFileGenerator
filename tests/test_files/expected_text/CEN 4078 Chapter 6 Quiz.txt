@@ -4,7 +4,7 @@
 Title: CEN 4078 Chapter 6 Quiz
 
 Number of questions: 30
-Number of multiple choice questions: 25
+Number of multiple choice questions: 26
 Number of matching questions: 3
 Number of multiple answers questions: 1
 ==========================================
@@ -53,6 +53,13 @@ A data canary is avalue located at the end of an assigne buffer length. Which of
 3. Overwriting the data canary with a copy of the canary throws an error.
 
 Answer: If the canary is altered, the data preceding it may be compromised
+--------------------------------
+
+The main reason we limit error log size is that we only need so many years of data to prosecute attackers.
+1. True
+2. False
+
+Answer: False
 --------------------------------
 
 A ___ is used to prevent a return value from being overwritten.

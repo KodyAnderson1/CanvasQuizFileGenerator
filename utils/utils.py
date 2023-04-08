@@ -121,10 +121,11 @@ def insert_newlines(text: str) -> str:
 
 
 def extract_points(s: str) -> tuple:
-    regex = r'^\s*(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*pts\s*$'
-    match = re.match(regex, s)
+    regex = r'(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*pts'
+    match = re.search(regex, s, re.IGNORECASE)
     if match is None:
         raise ValueError(f'Invalid input string: "{s}"')
+
     user_points_str, total_points_str = match.groups()
     try:
         user_points = int(user_points_str)
@@ -134,4 +135,5 @@ def extract_points(s: str) -> tuple:
         total_points = int(total_points_str)
     except ValueError:
         total_points = float(total_points_str)
+
     return user_points, total_points

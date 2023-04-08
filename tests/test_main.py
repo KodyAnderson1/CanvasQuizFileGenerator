@@ -29,9 +29,12 @@ def test_process_files():
         expected_text = expected_file.read_text()
         output_file = OUTPUT_TEXT_DIR / expected_file.name
         output_text = output_file.read_text()
+        print(f"TEXT DOES NOT MATCH: EXPECTED: {expected_file} ACTUAL: {output_file}")
         assert expected_text == output_text
         if expected_text == output_text:
             output_file.unlink()  # Delete the output file if the assertion is successful
+        else:
+            print(f"TEXT DOES NOT MATCH: EXPECTED: {expected_text} ACTUAL: {output_text}")
 
 
 def test_parse_html():

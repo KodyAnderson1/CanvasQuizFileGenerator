@@ -7,7 +7,7 @@ from typing import Optional, Dict
 from bs4 import BeautifulSoup
 import time
 
-from utils.processor import ProcessQuestions, process_html
+from utils.processor import process_html
 from utils.quiz import Quiz, QuizWriter
 from utils.utils import get_all_questions, remove_tags
 
