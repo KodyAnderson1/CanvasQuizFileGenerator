@@ -1,4 +1,5 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Union
@@ -6,7 +7,7 @@ from typing import List, Union
 import yaml
 
 from utils.questions import MatchingQuestion, MultipleShortAnswerQuestion, MultipleChoiceQuestion, \
-    MultipleAnswersQuestion
+    MultipleAnswersQuestion, ShortAnswerQuestion
 from utils.quiz import Quiz
 from utils.utils import insert_newlines
 
@@ -17,12 +18,13 @@ HEADINGS = {
     "multiple_answers": ("=" * 42) + "\n" + (" " * 9) + "MULTIPLE ANSWER QUESTIONS\n" + ("=" * 42) + "\n\n",
     "matching": ("=" * 42) + "\n" + (" " * 14) + "MATCHING QUESTIONS\n" + ("=" * 42) + "\n\n",
     "multiple_short_answers": ("=" * 42) + "\n" + (" " * 6) + "MULTIPLE SHORT ANSWER QUESTIONS\n" + ("=" * 42) + "\n\n",
+    "short_answer": ("=" * 42) + "\n" + (" " * 13) + "SHORT ANSWER QUESTIONS\n" + ("=" * 42) + "\n\n",
 }
 BETA_MESSAGE = " **This section is still being tested. Please report any bugs.**"
 BETA_CLASSES = [MultipleShortAnswerQuestion]
 DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"
 NEWLINE = "\n"
-QUESTION_FORMAT_TUPLE = (MultipleShortAnswerQuestion, MultipleAnswersQuestion)
+QUESTION_FORMAT_TUPLE = (MultipleShortAnswerQuestion, MultipleAnswersQuestion, ShortAnswerQuestion)
 QUIZLET_TERM_DEFINITION_DELIMITER = "\\btd"
 QUIZLET_CARDS_DELIMITER = "\\bc"
 
@@ -47,11 +49,13 @@ class TextQuizFileWriter(QuizFileWriter):
             quiz = self.quiz
             mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
             maq, msaq = quiz.multiple_answer_questions, quiz.multiple_short_answer_questions
+            saq = quiz.short_answer_questions
             sections = [
                 (len(mcq), HEADINGS["multiple_choice"], "multiple choice questions", mcq),
                 (len(mq), HEADINGS["matching"], "matching questions", mq),
                 (len(maq), HEADINGS["multiple_answers"], "multiple answers questions", maq),
-                (len(msaq), HEADINGS["multiple_short_answers"], "multiple short answer questions", msaq)
+                (len(msaq), HEADINGS["multiple_short_answers"], "multiple short answer questions", msaq),
+                (len(saq), HEADINGS["short_answer"], "short answer questions", saq)
             ]
 
             text_file.write(HEADINGS["initial"])
@@ -89,6 +93,8 @@ class TextQuizFileWriter(QuizFileWriter):
                 return f"Answer: {q.answer}"
             elif isinstance(q, MultipleAnswersQuestion):
                 return f"Answer(s):\n{f'{NEWLINE}'.join(q.answers)}"
+            elif isinstance(q, ShortAnswerQuestion):
+                return f"Answer(s): {q.answer}"
         return ""
 
     @staticmethod
@@ -110,11 +116,13 @@ class MarkdownQuizFileWriter(QuizFileWriter):
             quiz = self.quiz
             mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
             maq, msaq = quiz.multiple_answer_questions, quiz.multiple_short_answer_questions
+            saq = quiz.short_answer_questions
             sections = [
                 (len(mcq), "Multiple Choice Questions", mcq),
                 (len(mq), "Matching Questions", mq),
                 (len(maq), "Multiple Answer Questions", maq),
-                (len(msaq), "Multiple Short Answer Questions", msaq)
+                (len(msaq), "Multiple Short Answer Questions", msaq),
+                (len(saq), "Short Answer Questions", saq)
             ]
 
             text_file.write(f"# {quiz.title}\n\n- Number of questions: {quiz.number_of_questions}\n")
@@ -136,8 +144,7 @@ class MarkdownQuizFileWriter(QuizFileWriter):
                             answer_bank = format_choices(q.answer_bank)
                             word_bank = format_choices(q.word_bank)
                             choices = f"#### Answer Bank:\n{answer_bank}\n\n#### Word Bank:\n{word_bank}\n"
-
-                        if isinstance(q, QUESTION_FORMAT_TUPLE):
+                        elif isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
                         answer = self.format_answers(q)
@@ -154,6 +161,8 @@ class MarkdownQuizFileWriter(QuizFileWriter):
                 return f"#### _Answer(s):_ {q.answer}"
             elif isinstance(q, MultipleAnswersQuestion):
                 return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
+            elif isinstance(q, ShortAnswerQuestion):
+                return f"#### _Answer(s):_ {q.answer}"
             return ""
 
     @staticmethod
@@ -178,11 +187,13 @@ class QuizletQuizFileWriter(QuizFileWriter):
             quiz = self.quiz
             mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
             maq, msaq = quiz.multiple_answer_questions, quiz.multiple_short_answer_questions
+            saq = quiz.short_answer_questions
             sections = [
                 (len(mcq), HEADINGS["multiple_choice"], "multiple choice questions", mcq),
                 (len(mq), HEADINGS["matching"], "matching questions", mq),
                 (len(maq), HEADINGS["multiple_answers"], "multiple answers questions", maq),
-                (len(msaq), HEADINGS["multiple_short_answers"], "multiple short answer questions", msaq)
+                (len(msaq), HEADINGS["multiple_short_answers"], "multiple short answer questions", msaq),
+                (len(saq), HEADINGS["short_answer"], "short answer questions", saq)
             ]
 
             for count, heading, heading_text, questions in sections:
@@ -192,29 +203,33 @@ class QuizletQuizFileWriter(QuizFileWriter):
                         choices = format_choices(q.choices) if hasattr(q, 'choices') else ""
 
                         if isinstance(q, MatchingQuestion):
-                            answer_bank = format_choices(q.answer_bank)
-                            word_bank = format_choices(q.word_bank)
-                            choices = f"Answer Bank:\n{answer_bank}\n\nWord Bank:\n{word_bank}\n"
-
-                        if isinstance(q, QUESTION_FORMAT_TUPLE):
+                            choices = self.format_matching(q)
+                            text_file.writelines([f"\n{choices}\n"])
+                        elif isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
+                            answer = self.format_answers(q)
+                            text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
 
-                        answer = self.format_answers(q)
-                        text_file.writelines(
-                            [f"{question}\n\n{choices}\n{answer}\n{QUIZLET_CARDS_DELIMITER}\n"])
+    @staticmethod
+    def format_matching(q: MatchingQuestion):
+        return "\n\n".join([f"{q.question}\n\n{k}\n\n{format_choices(q.answer_bank)}"
+                            f"{QUIZLET_TERM_DEFINITION_DELIMITER}{v}{QUIZLET_CARDS_DELIMITER}"
+                            for k, v in q.answers.items()])
 
     @staticmethod
     def format_answers(q):
 
         if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
             if isinstance(q, MatchingQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
             elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{f', '.join(q.answers)}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
             elif isinstance(q, MultipleChoiceQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{q.answer}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{q.answer}"
             elif isinstance(q, MultipleAnswersQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}\n{f'{NEWLINE}'.join(q.answers)}"
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
+            elif isinstance(q, ShortAnswerQuestion):
+                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{q.answer}"
         return ""
 
 

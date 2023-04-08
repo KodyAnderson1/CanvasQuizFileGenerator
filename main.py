@@ -1,3 +1,8 @@
+import cProfile
+
+import log_config
+import logging
+
 import argparse
 import os
 import shutil
@@ -36,30 +41,6 @@ def parse_html(html_content: str) -> BeautifulSoup:
     return BeautifulSoup(html_content, "html.parser")
 
 
-# def process_files(args, directories: dict) -> None:
-#     raw_html_dir = Path(directories["raw_html"])
-#     parsed_html_dir = Path(directories["parsed_html"])
-#     output_dir = Path(directories["output"])
-#
-#     for raw_html_file in raw_html_dir.glob("*.html"):
-#         html_content = read_html_file(raw_html_file)
-#
-#         quiz = process_html(html_content)
-#         wq = QuizWriter(quiz)
-#
-#         output_file = output_dir / f"{quiz.title}"
-#         wq.write(args.file_type, output_file)
-#
-#         new_html_file = parsed_html_dir / f"{quiz.title}.html"
-#         if args.remove_html:
-#             os.remove(raw_html_file)
-#         elif args.dont_move:
-#             pass
-#         else:
-#             shutil.move(raw_html_file, new_html_file)
-#
-#         print(f"Processed {raw_html_file} and saved output as {output_file}.{args.file_type}")
-
 def process_single_file(args, raw_html_file: Path, output_dir: Path, parsed_html_dir: Path) -> str:
     html_content = read_html_file(raw_html_file)
 
@@ -67,15 +48,20 @@ def process_single_file(args, raw_html_file: Path, output_dir: Path, parsed_html
     wq = QuizWriter(quiz)
 
     output_file = output_dir / f"{quiz.title}"
-    wq.write(args.file_type, output_file)
+    try:
+        wq.write(args.file_type, output_file)
 
-    new_html_file = parsed_html_dir / f"{quiz.title}.html"
-    if args.remove_html:
-        os.remove(raw_html_file)
-    elif args.dont_move:
-        pass
-    else:
-        shutil.move(raw_html_file, new_html_file)
+        new_html_file = parsed_html_dir / f"{quiz.title}.html"
+        if args.remove_html:
+            os.remove(raw_html_file)
+        elif args.dont_move:
+            pass
+        else:
+            shutil.move(raw_html_file, new_html_file)
+
+    except Exception as ex:
+        logging.exception(ex)
+        logging.info(f"Error occurred while writing {raw_html_file}. Skipping...")
 
     return f"Processed {raw_html_file} and saved output as {output_file}.{args.file_type}"
 
@@ -86,8 +72,9 @@ def process_files(args, directories: dict) -> None:
     output_dir = Path(directories["output"])
 
     with ProcessPoolExecutor(max_workers=args.cores) as executor:
-        process_file_with_args = partial(process_single_file, args, output_dir=output_dir,
-                                         parsed_html_dir=parsed_html_dir)
+        process_file_with_args = \
+            partial(process_single_file, args, output_dir=output_dir, parsed_html_dir=parsed_html_dir)
+
         results = list(executor.map(process_file_with_args, raw_html_dir.glob("*.html")))
 
     for result in results:
@@ -122,26 +109,10 @@ def main():
         help="Number of CPU cores for processing. Default is half the available cores."
     )
 
-    # parser.add_argument(
-    #     "-btd", "--between_term_definition", type=str, default=global_variables.QUIZLET_TERM_DEFINITION_DELIMITER,
-    #     help=f"Delimiter between term and definition. Default is '{global_variables.QUIZLET_TERM_DEFINITION_DELIMITER}'"
-    # )
-    #
-    # parser.add_argument(
-    #     "-bc", "--between_cards", type=str, default=global_variables.QUIZLET_CARDS_DELIMITER,
-    #     help=f"Delimiter between cards. Default is '{global_variables.QUIZLET_CARDS_DELIMITER}'"
-    # )
-
     args = parser.parse_args()
 
     # Ensure the number of cores is between 1 and the total number of cores
     args.cores = max(min(args.cores, os.cpu_count()), 1)
-
-    # print(args.between_term_definition)
-    # print(args.between_cards)
-    #
-    # global_variables.QUIZLET_TERM_DEFINITION_DELIMITER = args.between_term_definition
-    # global_variables.QUIZLET_CARDS_DELIMITER = args.between_cards
 
     directories = load_directory_paths()
 
@@ -152,7 +123,13 @@ def main():
 
 if __name__ == '__main__':
     start_time = time.time()
-    # cProfile.run('main()', filename='my_results.prof')
-    main()
+
+    try:
+        # cProfile.run('main()', filename='my_results.prof')
+        main()
+    except Exception as e:
+        logging.exception(e)
+        logging.info("An error occurred. Please check the log file for more details.")
+
     end_time = time.time()
     print(f"Elapsed time: {end_time - start_time:.2f} seconds")

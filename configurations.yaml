@@ -2,3 +2,4 @@ directory_paths:
   parsed_html: "./html/parsed_html"
   raw_html: "./html/raw_html"
   output: "./output"
+  logs: "./logs"

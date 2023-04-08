@@ -1,6 +1,8 @@
 # Quiz File Generation
 
-## NOW WITH QUIZLET IMPORT SUPPORT
+## NOW WITH...
+
+### Quizlet Support!
 
 - The default format this project saves now is `qz.txt` which is a format intended to copy and paste directly into the
   import feature on a quizlet study set.
@@ -11,9 +13,14 @@
     - For `Between cards` click custom and enter `\bc`
 - Verify in the preview that everything is being imported correctly.
 
+### Short Answer Support! (Kinda)
+
+- Currently only supports answers that are you answered correctly. Support for incorrect answers will be added in the
+  future.
+
 ---
 
-** Warning: Check answers with positional indexing.**
+**Warning: Check answers with positional indexing.**
 
 Previously, answer positions could change when quiz files were generated. This issue should be resolved, but remain
 cautious.
@@ -32,12 +39,12 @@ Answer: Both A and C
 
 ---
 
-This project helps parse, create, and save quizzes in various formats, such as text, markdown, JSON, YAML, and supports
-Quizlet import from Canvas `.html` files. The `.html` file must be the quiz itself, not a submission page or any other
-page
-that loads the quiz as a secondary item.
+This project helps parse and save quizzes in various formats, such as text, markdown, JSON, YAML, and a Quizlet import
+friendly textfile. Generated from Canvas `.html` files. The `.html` file must be the quiz itself, not a submission page
+or any other page that loads the quiz as a secondary item.
 
-**Currently supports multiple choice, matching, multiple answer (selection box), and multiple short answer questions.**
+**Currently supports multiple choice, matching, multiple answer (selection box), short answer, and multiple short answer
+questions.**
 
 ## Table of Contents
 
@@ -128,6 +135,7 @@ directory_paths:
   parsed_html: "can/change/these/paths/html/parsed_html"
   raw_html: "can/change/these/paths/html/raw_html"
   output: "can/change/these/paths/output"
+  logs: "./logs"
 ```
 
 ## Setting up a virtual environment

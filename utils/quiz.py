@@ -5,7 +5,7 @@ from utils.questions import (
     MultipleShortAnswerQuestion,
     MultipleChoiceQuestion,
     MultipleAnswersQuestion,
-    MatchingQuestion,
+    MatchingQuestion, ShortAnswerQuestion,
 )
 
 
@@ -24,6 +24,7 @@ class Quiz:
         self.matching_questions: List[MatchingQuestion] = []
         self.multiple_answer_questions: List[MultipleAnswersQuestion] = []
         self.multiple_short_answer_questions: List[MultipleShortAnswerQuestion] = []
+        self.short_answer_questions: List[ShortAnswerQuestion] = []
         self.unrecognized_questions: dict = defaultdict(list)
 
     def __repr__(self):
@@ -31,7 +32,8 @@ class Quiz:
                f"\nMultiple_choice_questions =\n{self.multiple_choice_questions} " \
                f"\nMatching questions =\n{self.matching_questions}" \
                f"\nMultiple_answer_questions =\n{self.multiple_answer_questions}" \
-               f"\nmultiple_short_answer_questions =\n{self.multiple_short_answer_questions}"
+               f"\nmultiple_short_answer_questions =\n{self.multiple_short_answer_questions} " \
+               f"\nshort_answer_questions =\n{self.short_answer_questions} "
 
     def to_dict(self):
         return {
@@ -40,5 +42,7 @@ class Quiz:
             "multiple_choice_questions": [mcq.__dict__ for mcq in self.multiple_choice_questions],
             "matching_questions": [mq.__dict__ for mq in self.matching_questions],
             "multiple_answers_questions": [maq.__dict__ for maq in self.multiple_answer_questions],
-            "multiple_short_answer_questions": [msaq.__dict__ for msaq in self.multiple_short_answer_questions]
+            "multiple_short_answer_questions": [msaq.__dict__ for msaq in self.multiple_short_answer_questions],
+            "short_answer_questions": [saq.__dict__ for saq in self.short_answer_questions],
+
         }

@@ -10,7 +10,6 @@ class Question:
 
     def __init__(self, question: str = ""):
         self.question = question
-        self.correct_answer: List[str] | str = ""
 
 
 class MultipleShortAnswerQuestion(Question):
@@ -90,3 +89,19 @@ class MatchingQuestion(Question):
     def __repr__(self):
         return f"\nQuestion = {self.question}\nAnswers = {self.answers}" \
                f"\nAnswer bank = {self.answer_bank}\nWord bank = {self.word_bank}\n"
+
+
+class ShortAnswerQuestion(Question):
+    """
+    A class representing a short answer question.
+
+    :param question: The text of the question
+    :param answer: The correct answer to the question
+    """
+
+    def __init__(self, question: str = "", answer: str = ""):
+        super().__init__(question)
+        self.answer = answer
+
+    def __repr__(self):
+        return f"\nQuestion = {self.question}\nAnswer = {self.answer}\n"

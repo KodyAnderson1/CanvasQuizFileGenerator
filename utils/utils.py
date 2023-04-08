@@ -9,18 +9,6 @@ def get_all_questions(soup: BeautifulSoup = None) -> List[BeautifulSoup]:
     return soup.find_all('div', {'aria-label': 'Question'})
 
 
-# def remove_tags(html):
-#     # Create a BeautifulSoup object from the input HTML
-#     soup = BeautifulSoup(html, 'html.parser')
-#
-#     # Find all img, a, script, and noscript tags and remove them
-#     for tag in soup.find_all(['img', 'a', 'script', 'noscript', 'head']):
-#         tag.decompose()
-#
-#     # Return the cleaned HTML as a string
-#     return soup
-
-
 def clean_input(input_obj):
     def clean_str(s: str) -> str:
         return ' '.join(s.strip().split())

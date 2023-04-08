@@ -139,4 +139,4 @@ tests/
 *.prof
 tester.py
 misc/
-
+logs/
