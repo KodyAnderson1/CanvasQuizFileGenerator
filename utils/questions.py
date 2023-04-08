@@ -1,7 +1,19 @@
 from typing import Dict, List
 
 
-class MultipleShortAnswerQuestion:
+class Question:
+    """
+    A parent class representing all questions.
+
+    :param question: The text of the question
+    """
+
+    def __init__(self, question: str = ""):
+        self.question = question
+        self.correct_answer: List[str] | str = ""
+
+
+class MultipleShortAnswerQuestion(Question):
     """
     A class representing a multiple short answer question.
 
@@ -10,14 +22,14 @@ class MultipleShortAnswerQuestion:
     """
 
     def __init__(self, question: str = "", answers: List[str] = None):
-        self.question: str = question
+        super().__init__(question)
         self.answers: List[str] = answers
 
     def __repr__(self):
         return f"\nQuestion = {self.question}\nAnswers =\n{self.answers}\n"
 
 
-class MultipleAnswersQuestion:
+class MultipleAnswersQuestion(Question):
     """
     A class representing a multiple-answers question.
 
@@ -27,7 +39,7 @@ class MultipleAnswersQuestion:
     """
 
     def __init__(self, question: str = "", answers: List[str] = None, choices: List[str] = None):
-        self.question: str = question
+        super().__init__(question)
         self.answers: List[str] = answers
         self.choices: List[str] = choices
 
@@ -35,7 +47,7 @@ class MultipleAnswersQuestion:
         return f"\nQuestion = {self.question}\nAnswers =\n{self.answers}\nChoices =\n{self.choices}\n"
 
 
-class MultipleChoiceQuestion:
+class MultipleChoiceQuestion(Question):
     """
      A class representing a multiple-choice question.
 
@@ -45,7 +57,7 @@ class MultipleChoiceQuestion:
      """
 
     def __init__(self, question: str = "", answer: str = "", choices: List[str] = None):
-        self.question = question
+        super().__init__(question)
         self.answer = answer
         self.choices = choices if choices else []
 
@@ -53,7 +65,7 @@ class MultipleChoiceQuestion:
         return f"\nQuestion = {self.question}\nAnswer = {self.answer}\nChoices = {self.choices}\n"
 
 
-class MatchingQuestion:
+class MatchingQuestion(Question):
     """
     A class representing a matching question.
 
@@ -70,7 +82,7 @@ class MatchingQuestion:
             answer_bank: List[str] = None,
             word_bank: List[str] = None,
     ):
-        self.question = question
+        super().__init__(question)
         self.answers = answers
         self.answer_bank = answer_bank
         self.word_bank = word_bank

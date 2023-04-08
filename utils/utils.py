@@ -5,6 +5,22 @@ import re
 from bs4 import BeautifulSoup, Tag
 
 
+def get_all_questions(soup: BeautifulSoup = None) -> List[BeautifulSoup]:
+    return soup.find_all('div', {'aria-label': 'Question'})
+
+
+def remove_tags(html):
+    # Create a BeautifulSoup object from the input HTML
+    soup = BeautifulSoup(html, 'html.parser')
+
+    # Find all img, a, script, and noscript tags and remove them
+    for tag in soup.find_all(['img', 'a', 'script', 'noscript']):
+        tag.decompose()
+
+    # Return the cleaned HTML as a string
+    return soup
+
+
 def clean_input(input_obj):
     """
     Cleans an input object by removing extra whitespace, newlines, and empty values.
@@ -61,7 +77,7 @@ def clean_html(html_string) -> str:
         input_tag.replace_with('__________')
 
     # Remove &nbsp; entities
-    for nbsp_tag in soup.find_all(text=lambda t: t == '\xa0'):
+    for nbsp_tag in soup.find_all(string=lambda t: t == '\xa0'):
         nbsp_tag.string.replace_with('')
 
     # Get the text content of the modified HTML and return it
@@ -102,3 +118,22 @@ def insert_newlines(text: str) -> str:
             result.append(' ')
 
     return ''.join(result)
+
+
+def extract_points(s: str) -> tuple:
+    regex = r'(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*pts'
+    match = re.search(regex, s, re.IGNORECASE)
+    if match is None:
+        raise ValueError(f'Invalid input string: "{s}"')
+
+    user_points_str, total_points_str = match.groups()
+    try:
+        user_points = int(user_points_str)
+    except ValueError:
+        user_points = float(user_points_str)
+    try:
+        total_points = int(total_points_str)
+    except ValueError:
+        total_points = float(total_points_str)
+
+    return user_points, total_points

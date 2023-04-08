@@ -1,6 +1,6 @@
-from utils.utils import insert_newlines, clean_html, remove_duplicates, clean_input
-from bs4 import BeautifulSoup
 import pytest
+
+from utils.utils import insert_newlines, clean_html, remove_duplicates, clean_input
 
 
 def test_insert_newlines_no_parentheses():
@@ -112,23 +112,3 @@ def test_clean_html_empty_string():
 def test_clean_html_invalid_input():
     assert clean_html(123) == 123
     assert clean_html(None) == None
-
-# def test_clean_html_remove_img(sample_html):
-#     expected_output = '<html>\n<head>\n<title>Test Page</title>\n</head>\n<body>\n<h1>Test Page</h1>\n<p>This is a paragraph.</p>\n\n<p>This is another paragraph. This is a third sentence.</p>\n</body>\n</html>'
-#     soup = BeautifulSoup(sample_html, 'html.parser')
-#     actual_output = str(clean_html(soup))
-#     assert actual_output == expected_output
-
-
-# def test_clean_html_replace_input(sample_html):
-#     expected_output = '<html>\n<head>\n<title>Test Page</title>\n</head>\n<body>\n<h1>Test Page</h1>\n<p>This is a paragraph.</p>\n\n<p>This is another paragraph. This is a third sentence.</p>\n</body>\n</html>'
-#     soup = BeautifulSoup(sample_html, 'html.parser')
-#     actual_output = str(clean_html(soup))
-#     assert actual_output == expected_output
-#
-#
-# def test_clean_html_remove_nbsp(sample_html):
-#     expected_output = '<html>\n<head>\n<title>Test Page</title>\n</head>\n<body>\n<h1>Test Page</h1>\n<p>This is a paragraph.</p>\n\n<p>This is another paragraph. This is a third sentence.</p>\n</body>\n</html>'
-#     soup = BeautifulSoup(sample_html, 'html.parser')
-#     actual_output = str(clean_html(soup))
-#     assert actual_output.strip() == expected_output.strip()

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Union
 import json
@@ -62,6 +63,7 @@ class Quiz:
         self.matching_questions: List[MatchingQuestion] = []
         self.multiple_answer_questions: List[MultipleAnswersQuestion] = []
         self.multiple_short_answer_questions: List[MultipleShortAnswerQuestion] = []
+        self.unrecognized_questions: dict = defaultdict(list)
 
     def __repr__(self):
         return f"Title = {self.title}\nNumber_of_questions = {self.number_of_questions} " \
@@ -116,16 +118,16 @@ class QuizWriter:
             return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices_list)])
 
         def format_answers(q):
-            if isinstance(q, MatchingQuestion):
-                return f"Answers:\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
-            elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"Answer(s): {f', '.join(q.answers)}"
-            elif isinstance(q, MultipleChoiceQuestion):
-                return f"Answer: {q.answer}"
-            elif isinstance(q, MultipleAnswersQuestion):
-                return f"Answer(s): \n{f'{NEWLINE}'.join(q.answers)}"
-            else:
-                return ""
+            if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
+                if isinstance(q, MatchingQuestion):
+                    return f"Answers:\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+                elif isinstance(q, MultipleShortAnswerQuestion):
+                    return f"Answer(s): {f', '.join(q.answers)}"
+                elif isinstance(q, MultipleChoiceQuestion):
+                    return f"Answer: {q.answer}"
+                elif isinstance(q, MultipleAnswersQuestion):
+                    return f"Answer(s): \n{f'{NEWLINE}'.join(q.answers)}"
+            return ""
 
         with open(file_name, 'w', encoding='utf-8') as text_file:
             quiz = self.quiz
@@ -174,15 +176,15 @@ class QuizWriter:
             return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices)])
 
         def format_answers(q):
-            if isinstance(q, MatchingQuestion):
-                return f"#### _Answer(s):_{NEWLINE}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
-            elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"#### _Answer(s):_ {f', '.join(q.answers)}"
-            elif isinstance(q, MultipleChoiceQuestion):
-                return f"#### _Answer(s):_ {q.answer}"
-            elif isinstance(q, MultipleAnswersQuestion):
-                return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
-            else:
+            if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
+                if isinstance(q, MatchingQuestion):
+                    return f"#### _Answer(s):_{NEWLINE}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
+                elif isinstance(q, MultipleShortAnswerQuestion):
+                    return f"#### _Answer(s):_ {f', '.join(q.answers)}"
+                elif isinstance(q, MultipleChoiceQuestion):
+                    return f"#### _Answer(s):_ {q.answer}"
+                elif isinstance(q, MultipleAnswersQuestion):
+                    return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
                 return ""
 
         dashes = f"\n\n{'-' * 3}\n\n"
@@ -237,16 +239,16 @@ class QuizWriter:
             return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices_list)])
 
         def format_answers(q):
-            if isinstance(q, MatchingQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
-            elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
-            elif isinstance(q, MultipleChoiceQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{q.answer}"
-            elif isinstance(q, MultipleAnswersQuestion):
-                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
-            else:
-                return ""
+            if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
+                if isinstance(q, MatchingQuestion):
+                    return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+                elif isinstance(q, MultipleShortAnswerQuestion):
+                    return f"{TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
+                elif isinstance(q, MultipleChoiceQuestion):
+                    return f"{TERM_DEFINITION_DELIMITER}{q.answer}"
+                elif isinstance(q, MultipleAnswersQuestion):
+                    return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
+            return ""
 
         with open(file_name, 'w', encoding='utf-8') as text_file:
             quiz = self.quiz

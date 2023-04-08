@@ -1,5 +1,5 @@
 import argparse
-import pytest
+
 
 def test_file_type_arg():
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
@@ -17,6 +17,7 @@ def test_file_type_arg():
 
     args = parser.parse_args(["-f", "json", "yaml"])
     assert args.file_type == ["json", "yaml"]
+
 
 def test_remove_html_arg():
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
@@ -42,6 +43,7 @@ def test_remove_html_arg():
     args = parser.parse_args([])
     assert args.remove_html == False
     assert args.dont_move == False
+
 
 def test_dont_move_arg():
     parser = argparse.ArgumentParser(description="Save a quiz as a specific file type.")
