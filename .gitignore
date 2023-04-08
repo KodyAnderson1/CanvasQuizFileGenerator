@@ -134,3 +134,4 @@ output/
 temp/
 *.html
 old_code/
+tests/

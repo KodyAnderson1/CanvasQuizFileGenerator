@@ -9,7 +9,7 @@ import yaml
 from bs4 import BeautifulSoup
 
 from utils.processor import process_html
-from utils.quiz import QuizWriter
+from utils.quiz_writer import QuizWriter
 
 
 def load_directory_paths() -> Dict[str, str]:

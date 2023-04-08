@@ -1,10 +1,11 @@
 from enum import Enum
 from typing import List, Optional
+
 from bs4 import BeautifulSoup
 
 from utils.quiz import MatchingQuestion, MultipleAnswersQuestion, MultipleChoiceQuestion, MultipleShortAnswerQuestion, \
     Quiz
-from utils.utils import clean_input, remove_html_tags, clean_html, remove_tags, get_all_questions, extract_points
+from utils.utils import clean_input, clean_html, get_all_questions, extract_points, remove_tags
 
 
 class QuestionTypes(Enum):
@@ -25,7 +26,7 @@ def get_question_text(soup: BeautifulSoup) -> str:
     :return: The question text for the multiple answer question.
     """
     question_textarea = soup.find("textarea", {"name": "question_text"})
-    return remove_html_tags(clean_input(clean_html(question_textarea)))
+    return clean_input(clean_html(question_textarea))
 
 
 def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:
