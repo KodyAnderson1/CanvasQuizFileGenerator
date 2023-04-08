@@ -1,6 +1,6 @@
+import re
 from html import unescape
 from typing import List
-import re
 
 from bs4 import BeautifulSoup, Tag
 
@@ -22,20 +22,23 @@ def remove_tags(html):
 
 
 def clean_input(input_obj):
-    """
-    Cleans an input object by removing extra whitespace, newlines, and empty values.
+    def clean_str(s: str) -> str:
+        return ' '.join(s.strip().split())
 
-    :param input_obj: The input object to clean.
-    :return: The cleaned object.
-    """
-    if isinstance(input_obj, str):
-        return ' '.join(input_obj.strip().split())
-    elif isinstance(input_obj, dict):
-        return {k.strip(): v.strip() for k, v in input_obj.items() if v.strip()}
-    elif isinstance(input_obj, list):
-        return remove_duplicates([' '.join(item.strip().split()) for item in input_obj if item.strip()])
-    else:
-        return input_obj
+    def clean_dict(d: dict) -> dict:
+        return {k.strip(): v.strip() for k, v in d.items() if v.strip()}
+
+    def clean_list(l: list) -> list:
+        return remove_duplicates([clean_str(item) for item in l if item.strip()])
+
+    cleaning_functions = {
+        str: clean_str,
+        dict: clean_dict,
+        list: clean_list,
+    }
+
+    cleaning_function = cleaning_functions.get(type(input_obj))
+    return cleaning_function(input_obj) if cleaning_function else input_obj
 
 
 def remove_duplicates(input_list) -> List:
