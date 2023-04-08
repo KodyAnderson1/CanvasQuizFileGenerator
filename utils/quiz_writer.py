@@ -11,9 +11,6 @@ from utils.quiz import Quiz
 from utils.utils import insert_newlines
 
 # Constants
-BETA_MESSAGE = " **This section is still being tested. Please report any bugs.**"
-BETA_CLASSES = [MultipleShortAnswerQuestion]
-
 HEADINGS = {
     "initial": ("=" * 42) + "\n" + (" " * 13) + "QUIZ INFORMATION\n" + ("=" * 42) + "\n",
     "multiple_choice": ("=" * 42) + "\n" + (" " * 9) + "MULTIPLE CHOICE QUESTIONS\n" + ("=" * 42) + "\n\n",
@@ -21,10 +18,10 @@ HEADINGS = {
     "matching": ("=" * 42) + "\n" + (" " * 14) + "MATCHING QUESTIONS\n" + ("=" * 42) + "\n\n",
     "multiple_short_answers": ("=" * 42) + "\n" + (" " * 6) + "MULTIPLE SHORT ANSWER QUESTIONS\n" + ("=" * 42) + "\n\n",
 }
-
+BETA_MESSAGE = " **This section is still being tested. Please report any bugs.**"
+BETA_CLASSES = [MultipleShortAnswerQuestion]
 DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"
 NEWLINE = "\n"
-
 QUESTION_FORMAT_TUPLE = (MultipleShortAnswerQuestion, MultipleAnswersQuestion)
 
 
@@ -43,7 +40,7 @@ class QuizFileWriter(ABC):
 
 class TextQuizFileWriter(QuizFileWriter):
     def write(self, file_path: Path) -> None:
-
+        print("FILE_PATH: ", file_path)
         with open(file_path, 'w', encoding='utf-8') as text_file:
             quiz = self.quiz
             mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
@@ -104,19 +101,7 @@ class TextQuizFileWriter(QuizFileWriter):
 
 class MarkdownQuizFileWriter(QuizFileWriter):
     def write(self, file_path: Path) -> None:
-
-        def format_answers(q):
-            if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
-                if isinstance(q, MatchingQuestion):
-                    return f"#### _Answer(s):_{NEWLINE}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
-                elif isinstance(q, MultipleShortAnswerQuestion):
-                    return f"#### _Answer(s):_ {f', '.join(q.answers)}"
-                elif isinstance(q, MultipleChoiceQuestion):
-                    return f"#### _Answer(s):_ {q.answer}"
-                elif isinstance(q, MultipleAnswersQuestion):
-                    return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
-                return ""
-
+        print("FILE_PATH: ", file_path)
         dashes = f"\n\n{'-' * 3}\n\n"
 
         with open(file_path, 'w', encoding='utf-8') as text_file:
@@ -153,8 +138,21 @@ class MarkdownQuizFileWriter(QuizFileWriter):
                         if isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
-                        answer = format_answers(q)
+                        answer = self.format_answers(q)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{dashes}"])
+
+    @staticmethod
+    def format_answers(q):
+        if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
+            if isinstance(q, MatchingQuestion):
+                return f"#### _Answer(s):_{NEWLINE}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
+            elif isinstance(q, MultipleShortAnswerQuestion):
+                return f"#### _Answer(s):_ {f', '.join(q.answers)}"
+            elif isinstance(q, MultipleChoiceQuestion):
+                return f"#### _Answer(s):_ {q.answer}"
+            elif isinstance(q, MultipleAnswersQuestion):
+                return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
+            return ""
 
     @staticmethod
     def write_markdown_summary(questions: list, heading: str, count: int) -> str:
@@ -169,24 +167,13 @@ class MarkdownQuizFileWriter(QuizFileWriter):
 class QuizletQuizFileWriter(QuizFileWriter):
     def write(self, file_path: Path) -> None:
         """
-                Write the Quiz object to a text file with the specified file name and a format for easy quizlet import
+        Write the Quiz object to a text file with the specified file name and a format for easy quizlet import
 
-                :param file_path: The name of the text file to write.
-                """
+        :param file_path: The name of the text file to write.
+        """
+        print("FILE_PATH: ", file_path)
         TERM_DEFINITION_DELIMITER = "\\btd\n"
         BETWEEN_CARDS_DELIMITER = "\n\\bc\n"
-
-        def format_answers(q):
-            if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
-                if isinstance(q, MatchingQuestion):
-                    return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
-                elif isinstance(q, MultipleShortAnswerQuestion):
-                    return f"{TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
-                elif isinstance(q, MultipleChoiceQuestion):
-                    return f"{TERM_DEFINITION_DELIMITER}{q.answer}"
-                elif isinstance(q, MultipleAnswersQuestion):
-                    return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
-            return ""
 
         with open(file_path, 'w', encoding='utf-8') as text_file:
             quiz = self.quiz
@@ -213,8 +200,24 @@ class QuizletQuizFileWriter(QuizFileWriter):
                         if isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
-                        answer = format_answers(q)
+                        answer = self.format_answers(q)
                         text_file.writelines([f"{question}\n\n{choices}\n{answer}{BETWEEN_CARDS_DELIMITER}"])
+
+    @staticmethod
+    def format_answers(q):
+        TERM_DEFINITION_DELIMITER = "\\btd\n"
+        BETWEEN_CARDS_DELIMITER = "\n\\bc\n"
+
+        if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
+            if isinstance(q, MatchingQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
+            elif isinstance(q, MultipleShortAnswerQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
+            elif isinstance(q, MultipleChoiceQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{q.answer}"
+            elif isinstance(q, MultipleAnswersQuestion):
+                return f"{TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
+        return ""
 
 
 class YAMLQuizFileWriter(QuizFileWriter):

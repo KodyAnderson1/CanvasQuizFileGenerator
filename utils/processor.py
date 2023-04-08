@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum
 from typing import List, Optional
 
@@ -5,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from utils.quiz import MatchingQuestion, MultipleAnswersQuestion, MultipleChoiceQuestion, MultipleShortAnswerQuestion, \
     Quiz
-from utils.utils import clean_input, clean_html, get_all_questions, extract_points, remove_tags
+from utils.utils import clean_input, clean_html, get_all_questions, extract_points
 
 
 class QuestionTypes(Enum):
@@ -192,24 +193,24 @@ def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
     return [name for name in tester_classes.get('class') if name not in ['display_question', 'question']]
 
 
-def find_quiz_title(html: str) -> Optional[str]:
-    soup = BeautifulSoup(html, "html.parser")
-    title_tag = soup.find("h1", id="quiz_title")
-    if not title_tag:
-        title_tag = soup.find("header", class_="quiz-header").find("h2")
-    return title_tag.text.strip() if title_tag else None
+def get_title_text(soup: BeautifulSoup) -> Optional[str]:
+    title_tag = soup.find('title')
 
+    if title_tag is None:
+        return f'No Title Found_{uuid.uuid4()}'
 
-def count_aria_labels(html: str, label_name: str) -> Optional[int]:
-    soup = BeautifulSoup(html, "html.parser")
-    return len(soup.find_all(attrs={"aria-label": label_name})) if soup else None
+    return "".join(c for c in title_tag.text if c not in (":", ";", ",", '.'))
 
 
 def process_html(html_content: str) -> Quiz:
-    quiz = Quiz(title=find_quiz_title(html_content), number_of_questions=count_aria_labels(html_content, "Question"))
+    soup = BeautifulSoup(html_content, 'html.parser')
 
-    soup = remove_tags(html_content)
+    quiz = Quiz(title=get_title_text(soup))
+    print("QUIZ TITLE IS: ", quiz.title)
+
     questions_list = get_all_questions(soup)
+
+    quiz.number_of_questions = len(questions_list)
 
     for item in questions_list:
         class_names = get_class_names(item, 'display_question')

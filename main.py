@@ -43,7 +43,6 @@ def process_files(args, directories: dict) -> None:
         html_content = read_html_file(raw_html_file)
 
         quiz = process_html(html_content)
-
         wq = QuizWriter(quiz)
 
         output_file = output_dir / f"{quiz.title}"
@@ -93,6 +92,7 @@ def main():
 
 if __name__ == '__main__':
     start_time = time.time()
+    # cProfile.run('main()', filename='my_results.prof')
     main()
     end_time = time.time()
     print(f"Elapsed time: {end_time - start_time:.2f} seconds")
