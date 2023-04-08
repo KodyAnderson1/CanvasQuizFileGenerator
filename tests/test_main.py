@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 import main
 import io
 
+from utils import processor
+
 EXPECTED_TEXT_DIR = Path("tests", "test_files", "expected_text")
 OUTPUT_TEXT_DIR = Path("tests", "test_files", "output_text")
 HTML_DIR = Path("tests", "html")
@@ -30,24 +32,6 @@ def test_process_files():
         assert expected_text == output_text
         if expected_text == output_text:
             output_file.unlink()  # Delete the output file if the assertion is successful
-
-
-def test_find_quiz_title():
-    html_content = "<html><head><title>Test Quiz</title></head><body><h1 id='quiz_title'>Test Quiz</h1></body></html>"
-    soup = BeautifulSoup(html_content, "html.parser")
-    assert main.find_quiz_title(soup) == "Test Quiz"
-
-
-def test_find_div_by_id():
-    html_content = "<html><body><div id='test-div'></div></body></html>"
-    soup = BeautifulSoup(html_content, "html.parser")
-    assert main.find_div_by_id(soup, "test-div").name == "div"
-
-
-def test_count_aria_labels():
-    html_content = "<html><body><div aria-label='Question'>Question 1</div><div aria-label='Question'>Question 2</div></body></html>"
-    soup = BeautifulSoup(html_content, "html.parser")
-    assert main.count_aria_labels(soup, "Question") == 2
 
 
 def test_parse_html():

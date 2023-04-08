@@ -1,0 +1,297 @@
+==========================================
+             QUIZ INFORMATION
+==========================================
+Title: CEN 4078 Chapter 6 Quiz
+
+Number of questions: 30
+Number of multiple choice questions: 26
+Number of matching questions: 3
+Number of multiple answers questions: 1
+==========================================
+         MULTIPLE CHOICE QUESTIONS
+==========================================
+
+True or False? A data canary can actively signal that it has been rewritten.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? An API can allow a system to call functionality from another executable or external library.
+1. True
+2. False
+
+
+--------------------------------
+
+________ is the process of translating high level programming languages into machine code.
+1. Compiling
+2. Just in Time Compiled
+3. Interpreting
+
+
+--------------------------------
+
+True or False? Defining a default case is not necessary for most switch statements.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? Regular expressions can be used to validate input in any circumstance.
+1. True
+2. False
+
+
+--------------------------------
+
+A data canary is avalue located at the end of an assigne buffer length. Which of these are true.
+1. The input data must fill the buffer up to the data canary
+2. If the canary is altered, the data preceding it may be compromised
+3. Overwriting the data canary with a copy of the canary throws an error.
+
+
+--------------------------------
+
+The main reason we limit error log size is that we only need so many years of data to prosecute attackers.
+1. True
+2. False
+
+
+--------------------------------
+
+A ___ is used to prevent a return value from being overwritten.
+1. stack lock
+2. data canary
+3. array bound
+4. nonexecutable stack
+
+
+--------------------------------
+
+True or False? A just-in-time compiled system is being constantly recompiled before each execution and may not contain the same code between executions.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? Leaving input on the incoming line can affect the next command or program that is executed.
+1. True
+2. False
+
+
+--------------------------------
+
+_____________ is the creation of a subclass to expand functionality to serve specialized circumstances.
+1. Overload
+2. Inheritance
+3. A child class
+4. A parent class
+5. None of the above
+
+
+--------------------------------
+
+True or False? The output of a program is not important from a security perspective; only the input matters.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? Error logs can be used by an attacker to gather information about the internal workings of a system.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? A thick client uses the host system primarily as an interface to a server on which most processing is done.
+1. True
+2. False
+
+
+--------------------------------
+
+_____________ is a redefinition of an existing operation for a new class.
+1. Overload
+2. Inheritance
+3. A child class
+4. A parent class
+5. None of the above
+
+
+--------------------------------
+
+True or False? Array bounds checking should be directly coded into a system rather than assumed.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? It is safe to execute user input directly.
+1. True
+2. False
+
+
+--------------------------------
+
+__________ is a humanly readable structure that is compiled for use on a computer.
+1. Machine code
+2. Programming language
+3. Pseudocode
+4. None of the above
+
+
+--------------------------------
+
+True or False? According to CERT, approximately 50% of computer attacks are caused by buffer overflow.
+1. True
+2. False
+
+
+--------------------------------
+
+____________ is necessary for protecting a system against malicious input.
+1. Input validation
+2. Input scrubbing
+3. Input size limitation
+4. All of the above
+5. None of the above
+
+
+--------------------------------
+
+True or False? Pseudocode is a mix between human language and machine code.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? If the input is scrubbed, the length of the input accepted does not need to be bound.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? Manipulated pointer associations can allow unintended variables to be rewritten.
+1. True
+2. False
+
+
+--------------------------------
+
+A ___ is an attack that stores more information in a location than it can hold.
+1. array bound
+2. buffer overflow
+3. stack ordering
+4. none of the above
+
+
+--------------------------------
+
+True or False? Programming languages are designed as an intermediary between human language and binary.
+1. True
+2. False
+
+
+--------------------------------
+
+True or False? Unsafe input characters should be removed from input strings provided by any user.
+1. True
+2. False
+
+
+--------------------------------
+
+==========================================
+              MATCHING QUESTIONS
+==========================================
+
+Match the following secure coding issues with their definition.
+Answer Bank:
+1. Exists when a product attempts to put more data in a buffer than it can hold, or when it attempts to put data in a memory area outside of the boundaries of a buffer.
+2. Inappropriately assigns a signed variable to an unsigned variable
+3. Improper use of this code features allows the attacker to perform traversal
+4. Approximate random numbers statistically
+5. Based on crytopgraphic primitives and mathematical problems producing answers hard to predict
+6. Multiple threads are waiting for each other to release a necessary lock
+7. Uninitialized objects are incorrctly accessed
+8. Application does not sufficiently track, and release allocated memory after it has been used
+
+Word Bank:
+1. Buffer Overflow
+2. Integer Promotion Error
+3. Directory Restriction
+4. Statistical Psuedo Random Number Generators
+5. Cryptographic Psuedo Random Number Generators
+6. Deadlock
+7. Null Pointers
+8. Missing Releae of Memory
+
+
+
+--------------------------------
+
+Match the following deadlock causes and solutions.
+Answer Bank:
+1. Only one process can access a particular resource at a time
+2. Some processes must be 1) holding some resources and 2) waiting on other resources at the same time. The other resources are being held by other processes, with mutual exclusion.
+3. The held resources can only be released voluntarily by the holding process
+4. Processes in deadlock are waiting in a circular fashion such that each process locks one or more resources which the others need to continue
+5. Directly prevent circular waits. Indirectly prevent mutual exclusion, no pre-emption, or hold and wait
+6. Track resource usage, predict deadlock situations, and re-allocate processes and resources to avoid a deadlock
+7. Simulates the allocation of the predetermined maximum possible amounts of all resources and tests for safety towards allocating resources.
+8. Terminates (kills) one or more processes until the deadlock is removed
+9. Ostrich Algorithm. The Ostrich reboots the system
+
+Word Bank:
+1. Mutual Exclusion
+2. Hold and Wait
+3. No Pre-emption
+4. Circular Wait
+5. Deadlock Prevention
+6. Deadlock Avoidance
+7. Banker’s Algorithm
+8. Deadlock Detection
+9. Deadlock Ignorance
+
+
+
+--------------------------------
+
+Martch compiled and interpreted code to their definitions
+Answer Bank:
+1. translates the high-level language into native machine code or intermediary code.
+2. has lower layer of machine code that dynamically reads from a higher-language.
+
+Word Bank:
+1. Compiled code
+2. Interpreted code
+
+
+
+--------------------------------
+
+==========================================
+         MULTIPLE ANSWER QUESTIONS
+==========================================
+
+Which of these are true about not directly executing user input
+1. At least one layer of indirection is used
+2. Parsing a message is a linear cost or resources in a system
+3. Pattern matching may be peformed
+4. Input validation is a fail-safe method to block attackers' inputs
+
+Answer(s): 
+At least one layer of indirection is used
+Parsing a message is a linear cost or resources in a system
+Pattern matching may be peformed
+--------------------------------
+
