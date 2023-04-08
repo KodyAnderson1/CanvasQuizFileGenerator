@@ -154,7 +154,7 @@ def get_text_from_input(soup: BeautifulSoup, name: str) -> str:
     """
     question_input = soup.find("input", class_=name)
     question_textarea = question_input['value'] if question_input['value'] else NO_ANSWER
-    return clean_input(clean_html(question_textarea))
+    return clean_input(question_textarea)
 
 
 def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:

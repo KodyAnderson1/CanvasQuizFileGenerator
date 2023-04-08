@@ -1,6 +1,5 @@
-import cProfile
+from utils import log_config
 
-import log_config
 import logging
 
 import argparse
