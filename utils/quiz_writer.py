@@ -75,7 +75,7 @@ class TextQuizFileWriter(QuizFileWriter):
                         if isinstance(q, MatchingQuestion):
                             answer_bank = format_choices(q.answer_bank)
                             word_bank = format_choices(q.word_bank)
-                            choices = f"Answer Bank:\n{answer_bank}\n\nWord Bank:\n{word_bank}\n"
+                            choices = f"Answer Bank:\n{answer_bank}\n\nWord Bank:\n{word_bank}"
 
                         if isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
@@ -143,7 +143,7 @@ class MarkdownQuizFileWriter(QuizFileWriter):
                         if isinstance(q, MatchingQuestion):
                             answer_bank = format_choices(q.answer_bank)
                             word_bank = format_choices(q.word_bank)
-                            choices = f"#### Answer Bank:\n{answer_bank}\n\n#### Word Bank:\n{word_bank}\n"
+                            choices = f"#### Answer Bank:\n{answer_bank}\n\n#### Word Bank:\n{word_bank}"
                         elif isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
@@ -204,17 +204,22 @@ class QuizletQuizFileWriter(QuizFileWriter):
 
                         if isinstance(q, MatchingQuestion):
                             choices = self.format_matching(q)
-                            text_file.writelines([f"\n{choices}\n"])
+                            text_file.writelines([f"{choices}"])
+                        if isinstance(q, MultipleChoiceQuestion):
+                            answer = self.format_answers(q)
+                            text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
                         elif isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
                             answer = self.format_answers(q)
                             text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
+                        else:
+                            logging.warning(f"Question type {type(q)} not supported for Quizlet import")
 
     @staticmethod
     def format_matching(q: MatchingQuestion):
-        return "\n\n".join([f"{q.question}\n\n{k}\n\n{format_choices(q.answer_bank)}"
-                            f"{QUIZLET_TERM_DEFINITION_DELIMITER}{v}{QUIZLET_CARDS_DELIMITER}"
-                            for k, v in q.answers.items()])
+        return "\n".join([f"{q.question}\n\n{k}\n\n{format_choices(q.answer_bank)}"
+                          f"{QUIZLET_TERM_DEFINITION_DELIMITER}{v}{QUIZLET_CARDS_DELIMITER}"
+                          for k, v in q.answers.items()])
 
     @staticmethod
     def format_answers(q):
