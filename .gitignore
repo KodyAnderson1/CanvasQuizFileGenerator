@@ -135,3 +135,7 @@ temp/
 *.html
 old_code/
 tests/
+/tests/
+*.prof
+tester.py
+
