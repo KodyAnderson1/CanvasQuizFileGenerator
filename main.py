@@ -1,15 +1,15 @@
 import argparse
 import os
 import shutil
-import yaml
-from pathlib import Path
-from typing import Optional, Dict
-from bs4 import BeautifulSoup
 import time
+from pathlib import Path
+from typing import Dict
+
+import yaml
+from bs4 import BeautifulSoup
 
 from utils.processor import process_html
-from utils.quiz import Quiz, QuizWriter
-from utils.utils import get_all_questions, remove_tags
+from utils.quiz import QuizWriter
 
 
 def load_directory_paths() -> Dict[str, str]:

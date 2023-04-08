@@ -1,15 +1,10 @@
-import argparse
 import os
 from argparse import Namespace
 from pathlib import Path
 
-import pytest
 from bs4 import BeautifulSoup
 
 import main
-import io
-
-from utils import processor
 
 EXPECTED_TEXT_DIR = Path("tests", "test_files", "expected_text")
 OUTPUT_TEXT_DIR = Path("tests", "test_files", "output_text")

@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import List, Dict, Optional
-from bs4 import BeautifulSoup, Tag
+from typing import List, Optional
+from bs4 import BeautifulSoup
 
 from utils.quiz import MatchingQuestion, MultipleAnswersQuestion, MultipleChoiceQuestion, MultipleShortAnswerQuestion, \
     Quiz
@@ -150,8 +150,6 @@ def process_single_multiple_short_answers(soup) -> MultipleShortAnswerQuestion:
 
     points = extract_points(find_elements_by_class(soup, 'user_points').get_text(strip=True))
 
-    print(msa.answers)
-
     if not msa.answers and points[0] == points[1]:
         selected_answer = text_by_filter(soup=soup, initial_filter="selected_answer", last_filter="answer_text")
         msa.answers = selected_answer if selected_answer else []
@@ -216,12 +214,7 @@ def process_html(html_content: str) -> Quiz:
         class_names = get_class_names(item, 'display_question')
         question_type = class_names[0]  # FIXME. Potential crash if no 0
 
-        # credit_received = class_names[1] if len(class_names) >= 2 else None
-        # trial_dict[class_names[0]].append(PreProcessedQuestion(soup_html=item, credit_received=credit_received))
-
         add_to_quiz(quiz=quiz, question_type=question_type, soup=item)
-
-    # print(quiz.matching_questions)
 
     return quiz
 
