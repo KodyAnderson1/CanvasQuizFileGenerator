@@ -70,6 +70,20 @@ def find_elements_by_class(soup: BeautifulSoup, filter_by: str):
     return soup.find("div", class_=filter_by)
 
 
+def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
+    tester_classes = soup.find('div', class_=class_to_search)
+    return [name for name in tester_classes.get('class') if name not in ['display_question', 'question']]
+
+
+def get_title_text(soup: BeautifulSoup) -> Optional[str]:
+    title_tag = soup.find('title')
+
+    if title_tag is None:
+        return f'No Title Found_{uuid.uuid4()}'
+
+    return "".join(c for c in title_tag.text if c not in (":", ";", ",", '.'))
+
+
 # FIXME ERROR HANDLING FOR if user doesnt answer a question
 def process_single_multiple_choice(soup: BeautifulSoup) -> MultipleChoiceQuestion:
     """
@@ -188,25 +202,10 @@ def add_to_quiz(quiz: Quiz, question_type: str, soup: BeautifulSoup) -> Quiz:
     return quiz
 
 
-def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
-    tester_classes = soup.find('div', class_=class_to_search)
-    return [name for name in tester_classes.get('class') if name not in ['display_question', 'question']]
-
-
-def get_title_text(soup: BeautifulSoup) -> Optional[str]:
-    title_tag = soup.find('title')
-
-    if title_tag is None:
-        return f'No Title Found_{uuid.uuid4()}'
-
-    return "".join(c for c in title_tag.text if c not in (":", ";", ",", '.'))
-
-
 def process_html(html_content: str) -> Quiz:
     soup = BeautifulSoup(html_content, 'html.parser')
 
     quiz = Quiz(title=get_title_text(soup))
-    print("QUIZ TITLE IS: ", quiz.title)
 
     questions_list = get_all_questions(soup)
 

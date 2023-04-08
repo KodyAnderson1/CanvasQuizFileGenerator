@@ -2,6 +2,8 @@ import argparse
 import os
 import shutil
 import time
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial
 from pathlib import Path
 from typing import Dict
 
@@ -34,29 +36,62 @@ def parse_html(html_content: str) -> BeautifulSoup:
     return BeautifulSoup(html_content, "html.parser")
 
 
+# def process_files(args, directories: dict) -> None:
+#     raw_html_dir = Path(directories["raw_html"])
+#     parsed_html_dir = Path(directories["parsed_html"])
+#     output_dir = Path(directories["output"])
+#
+#     for raw_html_file in raw_html_dir.glob("*.html"):
+#         html_content = read_html_file(raw_html_file)
+#
+#         quiz = process_html(html_content)
+#         wq = QuizWriter(quiz)
+#
+#         output_file = output_dir / f"{quiz.title}"
+#         wq.write(args.file_type, output_file)
+#
+#         new_html_file = parsed_html_dir / f"{quiz.title}.html"
+#         if args.remove_html:
+#             os.remove(raw_html_file)
+#         elif args.dont_move:
+#             pass
+#         else:
+#             shutil.move(raw_html_file, new_html_file)
+#
+#         print(f"Processed {raw_html_file} and saved output as {output_file}.{args.file_type}")
+
+def process_single_file(args, raw_html_file: Path, output_dir: Path, parsed_html_dir: Path) -> str:
+    html_content = read_html_file(raw_html_file)
+
+    quiz = process_html(html_content)
+    wq = QuizWriter(quiz)
+
+    output_file = output_dir / f"{quiz.title}"
+    wq.write(args.file_type, output_file)
+
+    new_html_file = parsed_html_dir / f"{quiz.title}.html"
+    if args.remove_html:
+        os.remove(raw_html_file)
+    elif args.dont_move:
+        pass
+    else:
+        shutil.move(raw_html_file, new_html_file)
+
+    return f"Processed {raw_html_file} and saved output as {output_file}.{args.file_type}"
+
+
 def process_files(args, directories: dict) -> None:
     raw_html_dir = Path(directories["raw_html"])
     parsed_html_dir = Path(directories["parsed_html"])
     output_dir = Path(directories["output"])
 
-    for raw_html_file in raw_html_dir.glob("*.html"):
-        html_content = read_html_file(raw_html_file)
+    with ProcessPoolExecutor(max_workers=args.cores) as executor:
+        process_file_with_args = partial(process_single_file, args, output_dir=output_dir,
+                                         parsed_html_dir=parsed_html_dir)
+        results = list(executor.map(process_file_with_args, raw_html_dir.glob("*.html")))
 
-        quiz = process_html(html_content)
-        wq = QuizWriter(quiz)
-
-        output_file = output_dir / f"{quiz.title}"
-        wq.write(args.file_type, output_file)
-
-        new_html_file = parsed_html_dir / f"{quiz.title}.html"
-        if args.remove_html:
-            os.remove(raw_html_file)
-        elif args.dont_move:
-            pass
-        else:
-            shutil.move(raw_html_file, new_html_file)
-
-        print(f"Processed {raw_html_file} and saved output as {output_file}.{args.file_type}")
+    for result in results:
+        print(result)
 
 
 def main():
@@ -81,7 +116,15 @@ def main():
              "Selecting this flag will prevent the use of the -rm flag."
     )
 
+    parser.add_argument(
+        "-c", "--cores", type=int, default=os.cpu_count() // 2,
+        help="The number of CPU cores to use for processing. Default is half the available cores."
+    )
+
     args = parser.parse_args()
+
+    # Make sure the number of cores is at least 1 and not greater than the total number of cores
+    args.cores = max(min(args.cores, os.cpu_count()), 1)
 
     directories = load_directory_paths()
 

@@ -40,7 +40,7 @@ class QuizFileWriter(ABC):
 
 class TextQuizFileWriter(QuizFileWriter):
     def write(self, file_path: Path) -> None:
-        print("FILE_PATH: ", file_path)
+
         with open(file_path, 'w', encoding='utf-8') as text_file:
             quiz = self.quiz
             mcq, mq = quiz.multiple_choice_questions, quiz.matching_questions
@@ -101,7 +101,7 @@ class TextQuizFileWriter(QuizFileWriter):
 
 class MarkdownQuizFileWriter(QuizFileWriter):
     def write(self, file_path: Path) -> None:
-        print("FILE_PATH: ", file_path)
+
         dashes = f"\n\n{'-' * 3}\n\n"
 
         with open(file_path, 'w', encoding='utf-8') as text_file:
@@ -171,7 +171,7 @@ class QuizletQuizFileWriter(QuizFileWriter):
 
         :param file_path: The name of the text file to write.
         """
-        print("FILE_PATH: ", file_path)
+
         TERM_DEFINITION_DELIMITER = "\\btd\n"
         BETWEEN_CARDS_DELIMITER = "\n\\bc\n"
 
