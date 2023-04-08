@@ -1,12 +1,12 @@
-import uuid
 import logging
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import Dict
 
 from bs4 import BeautifulSoup
 
 from utils.questions import ShortAnswerQuestion
-from utils.utils import clean_input, clean_html, get_all_questions, extract_points
+from utils.utils import clean_input, get_all_questions, extract_points, get_question_text, text_by_filter, \
+    find_elements_by_class, get_text_from_input, get_title_text, get_class_names
 from utils.quiz import (
     MatchingQuestion,
     MultipleAnswersQuestion,
@@ -25,89 +25,6 @@ class QuestionTypes(Enum):
     MultipleShortAnswer = 'fill_in_multiple_blanks_question'
     ShortAnswer = 'short_answer_question'
     Essay = 'essay_question'
-
-
-def get_question_text(soup: BeautifulSoup) -> str:
-    """
-    Extracts the question text from a given div element.
-
-    :param soup: A BeautifulSoup object containing a multiple answer question.
-    :return: The question text for the multiple answer question.
-    """
-    question_textarea = soup.find("textarea", {"name": "question_text"})
-    return clean_input(clean_html(question_textarea))
-
-
-def get_text_from_input(soup: BeautifulSoup, name: str) -> str:
-    """
-    Extracts the question text from a given div element.
-
-    :param soup: A BeautifulSoup object containing a multiple answer question.
-    :param name: The name of the textarea to extract the text from.
-    :return: The question text for the multiple answer question.
-    """
-    question_input = soup.find("input", class_=name)
-    question_textarea = question_input['value'] if question_input['value'] else NO_ANSWER
-    return clean_input(clean_html(question_textarea))
-
-
-def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:
-    """
-    Retrieves text from the given soup by applying the specified filters.
-
-    :param soup: A BeautifulSoup object
-    :param initial_filter: The initial filter to use.
-    :param last_filter: The last filter to use, if applicable.
-    :return: A list of text elements found after applying the filters.
-    """
-    if last_filter is None:
-        return clean_input([div.get_text() for div in soup.find_all('div', class_=initial_filter)])
-
-    return clean_input([
-        div.find("div", class_=last_filter).text if div.find("div", class_=last_filter) else ""
-        for div in soup.find_all("div", class_=initial_filter)
-    ])
-
-
-def find_all_elements_by_class(soup: BeautifulSoup, filter_by: str):
-    """
-    Find all elements with the specified class.
-
-    :param soup: A BeautifulSoup object.
-    :param filter_by: The class to filter the elements by.
-    :return: A list of elements with the specified class.
-    """
-    return soup.find_all("div", class_=filter_by)
-
-
-def find_elements_by_class(soup: BeautifulSoup, filter_by: str):
-    """
-    Find the first element with the specified class.
-
-    :param soup: A BeautifulSoup object.
-    :param filter_by: The class to filter the elements by.
-    :return: An element with the specified class.
-    """
-    return soup.find("div", class_=filter_by)
-
-
-def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
-    tester_classes = soup.find('div', class_=class_to_search)
-    return [name for name in tester_classes.get('class') if name not in ['display_question', 'question']]
-
-
-def get_title_text(soup: BeautifulSoup) -> Optional[str]:
-    """
-    Extracts the title text from a given div element.
-    :param soup: A BeautifulSoup object.
-    :return: The title text for the quiz.
-    """
-    title_tag = soup.find('title')
-
-    if title_tag is None:
-        return f'No Title Found_{uuid.uuid4()}'
-
-    return "".join(c for c in title_tag.text if c not in (":", ";", ",", '.'))
 
 
 # FIXME ERROR HANDLING FOR if user doesnt answer a question
