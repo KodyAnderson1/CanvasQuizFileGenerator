@@ -79,8 +79,6 @@ class Quiz:
 
         return quiz
 
-    # The code for the json_to_quiz function goes here
-
     def combine(self, other: 'Quiz') -> 'Quiz':
         # combined_quiz = Quiz(title=self.title + " & " + other.title)
         combined_quiz = Quiz(title="Combined Quiz")

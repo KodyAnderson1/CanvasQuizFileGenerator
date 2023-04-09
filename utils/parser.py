@@ -83,9 +83,9 @@ def parse_single_matching(soup: BeautifulSoup) -> MatchingQuestion:
 
     points = extract_points(find_elements_by_class(soup, 'user_points').get_text(strip=True))
 
-    if not mq.answers and points[0] == points[1]:
+    if points[0] == points[1]:
         mq.answers = {k: v for k, v in zip(mq.word_bank, mq.answer_bank)}
-    elif not mq.answers and points[0] != points[1]:
+    elif points[0] != points[1]:
         mq.answers = find_matching_answers_dict(soup)
 
     return mq
@@ -158,6 +158,7 @@ def add_to_quiz(quiz: Quiz, question_type: str, soup: BeautifulSoup) -> Quiz:
 
     elif question_type == QuestionTypes.Essay.value:
         logging.info("Essay questions are not supported yet. Skipping.")
+
     else:
         quiz.unrecognized_questions[question_type].append(soup)
         logging.warning(f"WARNING: Unrecognized question type '{question_type}'")
