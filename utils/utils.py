@@ -9,10 +9,22 @@ NO_ANSWER = "CANNOT DETERMINE ANSWER. PLEASE CHECK MANUALLY."
 
 
 def get_all_questions(soup: BeautifulSoup = None) -> List[BeautifulSoup]:
+    """
+    Extracts all questions from the given soup.
+
+    :param soup: The soup to extract the questions from.
+    :return: A list of BeautifulSoup objects containing the questions.
+    """
     return soup.find_all('div', {'aria-label': 'Question'})
 
 
 def clean_input(input_obj):
+    """
+    Cleans the input object by removing leading and trailing whitespace, and removing duplicate items from lists.
+    :param input_obj: The input object to clean.
+    :return: The cleaned input object.
+    """
+
     def clean_str(s: str) -> str:
         return ' '.join(s.strip().split())
 
@@ -103,6 +115,12 @@ def insert_newlines(text: str) -> str:
 
 
 def extract_points(s: str) -> tuple:
+    """
+    Extracts the user points and total points from a string.
+
+    :param s: The string to extract the points from.
+    :return: A tuple containing the user points and total points.
+    """
     regex = r'(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*pts'
     match = re.search(regex, s, re.IGNORECASE)
     if match is None:
@@ -175,6 +193,13 @@ def find_elements_by_class(soup: BeautifulSoup, filter_by: str):
 
 
 def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
+    """
+    Get the class names for a given div element.
+
+    :param soup: A BeautifulSoup object.
+    :param class_to_search: The class to search for.
+    :return: A list of class names for the given div element.
+    """
     tester_classes = soup.find('div', class_=class_to_search)
     return [name for name in tester_classes.get('class') if name not in ['display_question', 'question']]
 
@@ -182,6 +207,7 @@ def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
 def get_title_text(soup: BeautifulSoup) -> Optional[str]:
     """
     Extracts the title text from a given div element.
+
     :param soup: A BeautifulSoup object.
     :return: The title text for the quiz.
     """

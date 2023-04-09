@@ -11,7 +11,8 @@ from utils.questions import (
 
 class Quiz:
     """
-    A class representing a quiz with multiple choice and matching questions.
+    A class representing a quiz with multiple questions. The quiz can contain multiple-choice questions,
+    matching questions, multiple-answers questions, multiple-short-answer questions, and short-answer questions.
 
     :param title: The title of the quiz
     :param number_of_questions: The total number of questions in the quiz
