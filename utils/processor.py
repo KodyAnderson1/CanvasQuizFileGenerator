@@ -41,14 +41,10 @@ def process_single_multiple_choice(soup: BeautifulSoup) -> MultipleChoiceQuestio
     points = extract_points(find_elements_by_class(soup, 'user_points').get_text(strip=True))
 
     if not mcq.answer and points[0] == points[1]:
-        logging.debug("Extracting selected answer...")
         selected_answer = text_by_filter(soup=soup, initial_filter="selected_answer", last_filter="answer_text")
         mcq.answer = selected_answer[0] if len(selected_answer) > 0 else ""
     elif not mcq.answer and points[0] != points[1]:
-        logging.debug("No answer found. Setting answer to 'NO_ANSWER'...")
         mcq.answer = NO_ANSWER
-    else:
-        logging.debug("Answer found. Continuing...")
 
     return mcq
 
