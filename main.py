@@ -1,8 +1,7 @@
-from utils import log_config
-
-import logging
-
 import argparse
+import itertools
+import json
+import logging
 import os
 import shutil
 import time
@@ -14,7 +13,9 @@ from typing import Dict
 import yaml
 from bs4 import BeautifulSoup
 
+from utils import log_config
 from utils.processor import process_html
+from utils.quiz import Quiz
 from utils.quiz_writer import QuizWriter
 
 
@@ -24,10 +25,10 @@ def load_directory_paths() -> Dict[str, str]:
     return paths["directory_paths"]
 
 
-def create_directories(directories: dict) -> None:
-    for k, v in directories.items():
-        if not os.path.exists(v):
-            os.makedirs(v)
+def create_output_directories(directories: dict) -> None:
+    for _, path in directories.items():
+        if not os.path.exists(path):
+            os.makedirs(path)
 
 
 def read_html_file(file_path: Path) -> str:
@@ -38,6 +39,12 @@ def read_html_file(file_path: Path) -> str:
 
 def parse_html(html_content: str) -> BeautifulSoup:
     return BeautifulSoup(html_content, "html.parser")
+
+
+def process_json_file(json_file: Path) -> Quiz:
+    with open(json_file, "r", encoding="utf-8") as file:
+        json_data = json.load(file)
+    return Quiz.from_json(json_data)
 
 
 def process_single_file(args, raw_html_file: Path, output_dir: Path, parsed_html_dir: Path) -> str:
@@ -65,19 +72,66 @@ def process_single_file(args, raw_html_file: Path, output_dir: Path, parsed_html
     return f"Processed {raw_html_file} and saved output as {output_file}.{args.file_type}"
 
 
+# def merge_quizzes(args, quiz_chunks: list) -> Quiz:
+#     merged_quiz = quiz_chunks[0]
+#     for quiz in quiz_chunks[1:]:
+#         merged_quiz = combine_quizzes(merged_quiz, quiz)
+#     return merged_quiz
+
+def merge_quizzes(args, quiz_chunks: list) -> Quiz:
+    merged_quiz = quiz_chunks[0]
+    for quiz in quiz_chunks[1:]:
+        merged_quiz = merged_quiz.combine(quiz)
+    return merged_quiz
+
+
+def combine_quizzes_from_files(args, quizzes, output_dir: Path) -> None:
+    # Split quizzes into chunks for parallel processing
+    chunk_size = max(len(quizzes) // args.cores, 1)
+    quiz_chunks = [quizzes[i:i + chunk_size] for i in range(0, len(quizzes), chunk_size)]
+
+    # Process each chunk in parallel and combine the results
+    with ProcessPoolExecutor(max_workers=args.cores) as executor:
+        merged_quiz_chunks = list(executor.map(merge_quizzes, itertools.repeat(args), quiz_chunks))
+
+    combined_quiz = merge_quizzes(args, merged_quiz_chunks)
+
+    wq = QuizWriter(combined_quiz)
+    output_file = output_dir / f"combined_quiz"
+    wq.write(args.file_type, output_file)
+
+
 def process_files(args, directories: dict) -> None:
     raw_html_dir = Path(directories["raw_html"])
     parsed_html_dir = Path(directories["parsed_html"])
     output_dir = Path(directories["output"])
 
-    with ProcessPoolExecutor(max_workers=args.cores) as executor:
-        process_file_with_args = \
-            partial(process_single_file, args, output_dir=output_dir, parsed_html_dir=parsed_html_dir)
+    if args.search_json:
+        file_extension = "*.json"
+    else:
+        file_extension = "*.html"
 
-        results = list(executor.map(process_file_with_args, raw_html_dir.glob("*.html")))
+    quizzes = []
 
-    for result in results:
-        print(result)
+    for file in raw_html_dir.glob(file_extension):
+        if args.search_json:
+            quiz = process_json_file(file)
+        else:
+            html_content = read_html_file(file)
+            quiz = process_html(html_content)
+        quizzes.append(quiz)
+
+    if args.combine:
+        combine_quizzes_from_files(args, quizzes, output_dir)
+    else:
+        with ProcessPoolExecutor(max_workers=args.cores) as executor:
+            process_file_with_args = \
+                partial(process_single_file, args, output_dir=output_dir, parsed_html_dir=parsed_html_dir)
+
+            results = list(executor.map(process_file_with_args, raw_html_dir.glob(file_extension)))
+
+        for result in results:
+            print(result)
 
 
 def main():
@@ -108,6 +162,16 @@ def main():
         help="Number of CPU cores for processing. Default is half the available cores."
     )
 
+    parser.add_argument(
+        "-sj", "--search_json", action="store_true",
+        help="Search for JSON files instead of HTML and combine all quiz objects represented."
+    )
+
+    parser.add_argument(
+        "-cb", "--combine", action="store_true",
+        help="Combine all quizzes found into one quiz item."
+    )
+
     args = parser.parse_args()
 
     # Ensure the number of cores is between 1 and the total number of cores
@@ -115,7 +179,7 @@ def main():
 
     directories = load_directory_paths()
 
-    create_directories(directories)
+    create_output_directories(directories)
 
     process_files(args, directories)
 
