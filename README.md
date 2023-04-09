@@ -16,7 +16,13 @@
 ### Short Answer Support! (Kinda)
 
 - Currently only supports answers that are you answered correctly. Support for incorrect answers will be added in the
-  future.
+  future. Though, will only populate with the correct answers if they are displayed in the HTML file.
+
+### Combined Quizzes!
+
+- The `-cb` flag will combine all `.html` files found in the `raw_html` directory into one quiz item.
+- The quiz item will be saved as `combined_quiz.[ext]` in the `output` directory.
+- This feature is still in beta, so please report any issues you find.
 
 ---
 
@@ -86,7 +92,7 @@ is `./html/raw_html`) and generate output files based on the specified file type
 To use this script, run the following command:
 
 ```bash
-python main.py [-h] [-rm | -dm] [-f {txt,md,json,yaml, qz.txt} [{txt,md,json,yaml,qz.txt} ...]] [-c CORES]
+python main.py [-h] [-rm | -dm] [-f {txt,md,json,yaml, qz.txt} [{txt,md,json,yaml,qz.txt} ...]] [-c CORES] [-cb]
 ```
 
 Here are the available flags:
@@ -100,6 +106,7 @@ Here are the available flags:
 - `-dm`, `--dont_move`: Keep HTML files in `raw_html` folder without renaming or moving. Default: False. Cannot use
   with `-rm`.
 - `-c`, `--cores`: The number of cores to use for processing the HTML files. Default is half the available cores.
+- `-cb`, `--combine`: Combine all quizzes found into one quiz item. Default: False.
 
 Examples:
 

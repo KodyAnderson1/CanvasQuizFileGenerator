@@ -37,18 +37,6 @@ def remove_duplicates(input_list) -> List:
     return [x for x in input_list if not (x in seen or seen.add(x))]
 
 
-def remove_html_tags(text):
-    """
-    Removes certain html tags from a string
-
-    :param text: The input string to be cleaned.
-    :return: A cleaned string with no html tags.
-    """
-    pattern = re.compile(r'<[^>]*>|&nbsp;|<img[^>"]+[^>]*')
-    clean_text = re.sub(pattern, '', text)
-    return clean_text
-
-
 def clean_html(html_string) -> str:
     """
     Cleans an HTML string by removing img tags, replacing input tags with a placeholder, and removing &nbsp; entities.
@@ -153,8 +141,8 @@ def get_text_from_input(soup: BeautifulSoup, name: str) -> str:
     :return: The question text for the multiple answer question.
     """
     question_input = soup.find("input", class_=name)
-    question_textarea = question_input['value'] if question_input['value'] else NO_ANSWER
-    return clean_input(question_textarea)
+    answer_text = question_input['value'] if question_input['value'] else NO_ANSWER
+    return clean_input(answer_text)
 
 
 def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:
@@ -173,17 +161,6 @@ def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = 
         div.find("div", class_=last_filter).text if div.find("div", class_=last_filter) else ""
         for div in soup.find_all("div", class_=initial_filter)
     ])
-
-
-def find_all_elements_by_class(soup: BeautifulSoup, filter_by: str):
-    """
-    Find all elements with the specified class.
-
-    :param soup: A BeautifulSoup object.
-    :param filter_by: The class to filter the elements by.
-    :return: A list of elements with the specified class.
-    """
-    return soup.find_all("div", class_=filter_by)
 
 
 def find_elements_by_class(soup: BeautifulSoup, filter_by: str):

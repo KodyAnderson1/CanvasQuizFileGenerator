@@ -82,10 +82,8 @@ class Quiz:
     # The code for the json_to_quiz function goes here
 
     def combine(self, other: 'Quiz') -> 'Quiz':
-        combined_quiz = Quiz(
-            title=self.title + " & " + other.title,
-            number_of_questions=self.number_of_questions + other.number_of_questions
-        )
+        # combined_quiz = Quiz(title=self.title + " & " + other.title)
+        combined_quiz = Quiz(title="Combined Quiz")
 
         seen_questions = set()
 
@@ -122,6 +120,10 @@ class Quiz:
                 seen_questions.add(question)
                 combined_quiz.matching_questions.append(question)
 
+        combined_quiz.number_of_questions = len(combined_quiz.multiple_choice_questions) + \
+                                            len(combined_quiz.multiple_answer_questions) + \
+                                            len(combined_quiz.multiple_short_answer_questions) + \
+                                            len(combined_quiz.short_answer_questions) + \
+                                            len(combined_quiz.matching_questions)
+
         return combined_quiz
-
-
