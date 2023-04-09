@@ -62,8 +62,8 @@ if __name__ == '__main__':
 
     try:
         quiz_processor_main = QuizProcessorMain()
-        # quiz_processor_main.main()
-        cProfile.run('quiz_processor_main.main()', filename='my_results.prof')
+        quiz_processor_main.main()
+        # cProfile.run('quiz_processor_main.main()', filename='my_results.prof')
     except Exception as e:
         logging.exception(e)
         logging.info("An error occurred. Please check the log file for more details.")
