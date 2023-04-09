@@ -205,7 +205,7 @@ class QuizletQuizFileWriter(QuizFileWriter):
                         if isinstance(q, MatchingQuestion):
                             choices = self.format_matching(q)
                             text_file.writelines([f"{choices}"])
-                        if isinstance(q, MultipleChoiceQuestion):
+                        elif isinstance(q, MultipleChoiceQuestion):
                             answer = self.format_answers(q)
                             text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
                         elif isinstance(q, QUESTION_FORMAT_TUPLE):
@@ -213,7 +213,7 @@ class QuizletQuizFileWriter(QuizFileWriter):
                             answer = self.format_answers(q)
                             text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
                         else:
-                            logging.warning(f"Question type {type(q)} not supported for Quizlet import")
+                            logging.error(f"Question type {type(q)} not supported for Quizlet import")
 
     @staticmethod
     def format_matching(q: MatchingQuestion):

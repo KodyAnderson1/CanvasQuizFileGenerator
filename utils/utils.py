@@ -9,10 +9,22 @@ NO_ANSWER = "CANNOT DETERMINE ANSWER. PLEASE CHECK MANUALLY."
 
 
 def get_all_questions(soup: BeautifulSoup = None) -> List[BeautifulSoup]:
+    """
+    Extracts all questions from the given soup.
+
+    :param soup: The soup to extract the questions from.
+    :return: A list of BeautifulSoup objects containing the questions.
+    """
     return soup.find_all('div', {'aria-label': 'Question'})
 
 
 def clean_input(input_obj):
+    """
+    Cleans the input object by removing leading and trailing whitespace, and removing duplicate items from lists.
+    :param input_obj: The input object to clean.
+    :return: The cleaned input object.
+    """
+
     def clean_str(s: str) -> str:
         return ' '.join(s.strip().split())
 
@@ -35,18 +47,6 @@ def clean_input(input_obj):
 def remove_duplicates(input_list) -> List:
     seen = set()
     return [x for x in input_list if not (x in seen or seen.add(x))]
-
-
-def remove_html_tags(text):
-    """
-    Removes certain html tags from a string
-
-    :param text: The input string to be cleaned.
-    :return: A cleaned string with no html tags.
-    """
-    pattern = re.compile(r'<[^>]*>|&nbsp;|<img[^>"]+[^>]*')
-    clean_text = re.sub(pattern, '', text)
-    return clean_text
 
 
 def clean_html(html_string) -> str:
@@ -115,6 +115,12 @@ def insert_newlines(text: str) -> str:
 
 
 def extract_points(s: str) -> tuple:
+    """
+    Extracts the user points and total points from a string.
+
+    :param s: The string to extract the points from.
+    :return: A tuple containing the user points and total points.
+    """
     regex = r'(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*pts'
     match = re.search(regex, s, re.IGNORECASE)
     if match is None:
@@ -153,8 +159,8 @@ def get_text_from_input(soup: BeautifulSoup, name: str) -> str:
     :return: The question text for the multiple answer question.
     """
     question_input = soup.find("input", class_=name)
-    question_textarea = question_input['value'] if question_input['value'] else NO_ANSWER
-    return clean_input(question_textarea)
+    answer_text = question_input['value'] if question_input['value'] else NO_ANSWER
+    return clean_input(answer_text)
 
 
 def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = None) -> List[str]:
@@ -175,17 +181,6 @@ def text_by_filter(soup: BeautifulSoup, initial_filter: str, last_filter: str = 
     ])
 
 
-def find_all_elements_by_class(soup: BeautifulSoup, filter_by: str):
-    """
-    Find all elements with the specified class.
-
-    :param soup: A BeautifulSoup object.
-    :param filter_by: The class to filter the elements by.
-    :return: A list of elements with the specified class.
-    """
-    return soup.find_all("div", class_=filter_by)
-
-
 def find_elements_by_class(soup: BeautifulSoup, filter_by: str):
     """
     Find the first element with the specified class.
@@ -198,6 +193,13 @@ def find_elements_by_class(soup: BeautifulSoup, filter_by: str):
 
 
 def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
+    """
+    Get the class names for a given div element.
+
+    :param soup: A BeautifulSoup object.
+    :param class_to_search: The class to search for.
+    :return: A list of class names for the given div element.
+    """
     tester_classes = soup.find('div', class_=class_to_search)
     return [name for name in tester_classes.get('class') if name not in ['display_question', 'question']]
 
@@ -205,6 +207,7 @@ def get_class_names(soup: BeautifulSoup, class_to_search: str) -> list:
 def get_title_text(soup: BeautifulSoup) -> Optional[str]:
     """
     Extracts the title text from a given div element.
+
     :param soup: A BeautifulSoup object.
     :return: The title text for the quiz.
     """

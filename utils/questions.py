@@ -11,6 +11,14 @@ class Question:
     def __init__(self, question: str = ""):
         self.question = question
 
+    def __eq__(self, other):
+        if not isinstance(other, Question):
+            return False
+        return self.question == other.question
+
+    def __hash__(self):
+        return hash(self.question)
+
 
 class MultipleShortAnswerQuestion(Question):
     """
@@ -26,6 +34,14 @@ class MultipleShortAnswerQuestion(Question):
 
     def __repr__(self):
         return f"\nQuestion = {self.question}\nAnswers =\n{self.answers}\n"
+
+    def __eq__(self, other):
+        if not isinstance(other, MultipleShortAnswerQuestion):
+            return False
+        return super().__eq__(other) and self.answers == other.answers
+
+    def __hash__(self):
+        return hash((super().__hash__(), tuple(self.answers)))
 
 
 class MultipleAnswersQuestion(Question):
@@ -45,6 +61,14 @@ class MultipleAnswersQuestion(Question):
     def __repr__(self):
         return f"\nQuestion = {self.question}\nAnswers =\n{self.answers}\nChoices =\n{self.choices}\n"
 
+    def __eq__(self, other):
+        if not isinstance(other, MultipleAnswersQuestion):
+            return False
+        return super().__eq__(other) and self.answers == other.answers and self.choices == other.choices
+
+    def __hash__(self):
+        return hash((super().__hash__(), tuple(self.answers), tuple(self.choices)))
+
 
 class MultipleChoiceQuestion(Question):
     """
@@ -62,6 +86,14 @@ class MultipleChoiceQuestion(Question):
 
     def __repr__(self):
         return f"\nQuestion = {self.question}\nAnswer = {self.answer}\nChoices = {self.choices}\n"
+
+    def __eq__(self, other):
+        if not isinstance(other, MultipleChoiceQuestion):
+            return False
+        return super().__eq__(other) and self.answer == other.answer and self.choices == other.choices
+
+    def __hash__(self):
+        return hash((super().__hash__(), self.answer, tuple(self.choices)))
 
 
 class MatchingQuestion(Question):
@@ -90,6 +122,24 @@ class MatchingQuestion(Question):
         return f"\nQuestion = {self.question}\nAnswers = {self.answers}" \
                f"\nAnswer bank = {self.answer_bank}\nWord bank = {self.word_bank}\n"
 
+    def __eq__(self, other):
+        if not isinstance(other, MatchingQuestion):
+            return False
+        return (
+                super().__eq__(other)
+                and self.answers == other.answers
+                and self.answer_bank == other.answer_bank
+                and self.word_bank == other.word_bank
+        )
+
+    def __hash__(self):
+        return hash((
+            super().__hash__(),
+            frozenset(self.answers.items()),
+            tuple(self.answer_bank),
+            tuple(self.word_bank),
+        ))
+
 
 class ShortAnswerQuestion(Question):
     """
@@ -105,3 +155,11 @@ class ShortAnswerQuestion(Question):
 
     def __repr__(self):
         return f"\nQuestion = {self.question}\nAnswer = {self.answer}\n"
+
+    def __eq__(self, other):
+        if not isinstance(other, ShortAnswerQuestion):
+            return False
+        return super().__eq__(other) and self.answer == other.answer
+
+    def __hash__(self):
+        return hash((super().__hash__(), self.answer))
