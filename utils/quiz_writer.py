@@ -1,8 +1,9 @@
 import json
 import logging
 from abc import ABC, abstractmethod
+from enum import Enum
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Any, Dict
 
 import yaml
 
@@ -29,8 +30,10 @@ QUIZLET_TERM_DEFINITION_DELIMITER = "\\btd"
 QUIZLET_CARDS_DELIMITER = "\\bc"
 
 
-def format_choices(choices_list):
-    return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices_list)])
+class FileWriterTypes(Enum):
+    Markdown = "MarkdownQuizFileWriter"
+    Text = "TextQuizFileWriter"
+    Quizlet = "QuizletFileWriter"
 
 
 class QuizFileWriter(ABC):
@@ -80,22 +83,8 @@ class TextQuizFileWriter(QuizFileWriter):
                         if isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
-                        answer = self.format_answers(q)
+                        answer = format_answers(q, FileWriterTypes.Text)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{DASHES_WITH_NEWLINES}"])
-
-    def format_answers(self, q):
-        if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
-            if isinstance(q, MatchingQuestion):
-                return f"Answer(s):\n{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
-            elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"Answer(s): {f', '.join(q.answers)}"
-            elif isinstance(q, MultipleChoiceQuestion):
-                return f"Answer: {q.answer}"
-            elif isinstance(q, MultipleAnswersQuestion):
-                return f"Answer(s):\n{f'{NEWLINE}'.join(q.answers)}"
-            elif isinstance(q, ShortAnswerQuestion):
-                return f"Answer(s): {q.answer}"
-        return ""
 
     @staticmethod
     def write_question_summary(questions: list, heading_text: str) -> str:
@@ -147,23 +136,8 @@ class MarkdownQuizFileWriter(QuizFileWriter):
                         elif isinstance(q, QUESTION_FORMAT_TUPLE):
                             question = insert_newlines(q.question)
 
-                        answer = self.format_answers(q)
+                        answer = format_answers(q, FileWriterTypes.Markdown)
                         text_file.writelines([f"{question}\n{choices}\n\n{answer}{dashes}"])
-
-    @staticmethod
-    def format_answers(q):
-        if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
-            if isinstance(q, MatchingQuestion):
-                return f"#### _Answer(s):_{NEWLINE}{''.join([f' {NEWLINE}- {key} : {value}' for key, value in q.answers.items()])}"
-            elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"#### _Answer(s):_ {f', '.join(q.answers)}"
-            elif isinstance(q, MultipleChoiceQuestion):
-                return f"#### _Answer(s):_ {q.answer}"
-            elif isinstance(q, MultipleAnswersQuestion):
-                return f'#### _Answer(s):_{f"".join([f"{NEWLINE}- {choice}" for choice in q.answers])}'
-            elif isinstance(q, ShortAnswerQuestion):
-                return f"#### _Answer(s):_ {q.answer}"
-            return ""
 
     @staticmethod
     def write_markdown_summary(questions: list, heading: str, count: int) -> str:
@@ -205,12 +179,9 @@ class QuizletQuizFileWriter(QuizFileWriter):
                         if isinstance(q, MatchingQuestion):
                             choices = self.format_matching(q)
                             text_file.writelines([f"{choices}"])
-                        elif isinstance(q, MultipleChoiceQuestion):
-                            answer = self.format_answers(q)
-                            text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
-                        elif isinstance(q, QUESTION_FORMAT_TUPLE):
+                        elif isinstance(q, QUESTION_FORMAT_TUPLE) or isinstance(q, MultipleChoiceQuestion):
                             question = insert_newlines(q.question)
-                            answer = self.format_answers(q)
+                            answer = format_answers(q, FileWriterTypes.Quizlet)
                             text_file.writelines([f"{question}\n\n{choices}{answer}{QUIZLET_CARDS_DELIMITER}\n"])
                         else:
                             logging.error(f"Question type {type(q)} not supported for Quizlet import")
@@ -220,22 +191,6 @@ class QuizletQuizFileWriter(QuizFileWriter):
         return "\n".join([f"{q.question}\n\n{k}\n\n{format_choices(q.answer_bank)}"
                           f"{QUIZLET_TERM_DEFINITION_DELIMITER}{v}{QUIZLET_CARDS_DELIMITER}"
                           for k, v in q.answers.items()])
-
-    @staticmethod
-    def format_answers(q):
-
-        if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
-            if isinstance(q, MatchingQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join([f'{key} : {value}' for key, value in q.answers.items()])}"
-            elif isinstance(q, MultipleShortAnswerQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{f', '.join(q.answers)}"
-            elif isinstance(q, MultipleChoiceQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{q.answer}"
-            elif isinstance(q, MultipleAnswersQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{f'{NEWLINE}'.join(q.answers)}"
-            elif isinstance(q, ShortAnswerQuestion):
-                return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{q.answer}"
-        return ""
 
 
 class YAMLQuizFileWriter(QuizFileWriter):
@@ -275,3 +230,38 @@ class QuizWriter:
                 writer.write(output_file_with_ext)
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")
+
+
+def format_choices(choices_list):
+    return "\n".join([f"{i + 1}. {choice}" for i, choice in enumerate(choices_list)])
+
+
+def format_answers(q: Any, writer_type: FileWriterTypes) -> str:
+    """
+    Formats the answers for the question.
+
+    :param q: Question
+    :param writer_type: FileWriterTypes
+    :return: str
+    """
+
+    def format_writer(q_answers: Union[str, List[str], Dict[str, str]]) -> str:
+        if writer_type == FileWriterTypes.Text:
+            return f"Answer(s): {', '.join(q_answers) if isinstance(q_answers, list) else NEWLINE.join([f'{key} : {value}' for key, value in q_answers.items()])}"
+        elif writer_type == FileWriterTypes.Quizlet:
+            return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{', '.join(q_answers) if isinstance(q_answers, list) else NEWLINE.join([f'{key} : {value}' for key, value in q_answers.items()])}"
+        elif writer_type == FileWriterTypes.Markdown:
+            return f"#### _Answer(s):_ {''.join([f'{NEWLINE}- {item}' for item in q_answers]) if isinstance(q_answers, list) else ''.join([f'{NEWLINE}- {key} : {value}' for key, value in q_answers.items()])}"
+
+    if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
+
+        if isinstance(q, (MatchingQuestion, MultipleShortAnswerQuestion)):
+            return format_writer(q.answers)
+        elif isinstance(q, MultipleChoiceQuestion):
+            return format_writer([q.answer])
+        elif isinstance(q, MultipleAnswersQuestion):
+            return format_writer(q.answers)
+        elif isinstance(q, ShortAnswerQuestion):
+            return format_writer([q.answer])
+
+    return ""
