@@ -34,8 +34,8 @@ class CustomFileHandler(logging.FileHandler):
 
 def setup_logging():
     # Create a logs directory if it doesn't exist
-    if not os.path.exists('../logs'):
-        os.makedirs('../logs')
+    if not os.path.exists('./logs'):
+        os.makedirs('./logs')
 
     # Set up the root logger
     logger = logging.getLogger()
@@ -52,7 +52,7 @@ def setup_logging():
     logger.addHandler(console_handler)
 
     # Set up the custom file handler for warning, error, and critical messages
-    file_handler = CustomFileHandler('../logs/logfile.log')
+    file_handler = CustomFileHandler('./logs/logfile.log')
     file_handler.setLevel(logging.WARNING)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
