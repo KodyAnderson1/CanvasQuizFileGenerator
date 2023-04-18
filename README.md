@@ -8,7 +8,7 @@
   import feature on a quizlet study set.
 - At the moment, the delimiters are hard-coded, but future iterations of the project will probably include a flag to
   determine them yourself.
-- On the import screen...
+- On the Quizlet import screen...
     - For `Between term and definition` click custom and enter `\btd`
     - For `Between cards` click custom and enter `\bc`
 - Verify in the preview that everything is being imported correctly.
