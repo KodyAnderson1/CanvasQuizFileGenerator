@@ -22,7 +22,7 @@
 
 - The `-cb` flag will combine all `.html` files found in the `raw_html` directory into one quiz item.
 - The quiz item will be saved as `combined_quiz.[ext]` in the `output` directory.
-- This feature is still in beta, so please report any issues you find.
+- This feature is still in beta, so please report any issues you find, and check the issues tab or known bugs.
 
 ---
 
