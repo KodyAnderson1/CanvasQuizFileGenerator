@@ -7,6 +7,7 @@ from typing import List, Union, Any, Dict
 
 import yaml
 
+from utils.constants import DASHES_WITH_NEWLINES, QUIZLET_CARDS_DELIMITER, QUIZLET_TERM_DEFINITION_DELIMITER
 from utils.questions import MatchingQuestion, MultipleShortAnswerQuestion, MultipleChoiceQuestion, \
     MultipleAnswersQuestion, ShortAnswerQuestion
 from utils.quiz import Quiz
@@ -23,11 +24,8 @@ HEADINGS = {
 }
 BETA_MESSAGE = " **This section is still being tested. Please report any bugs.**"
 BETA_CLASSES = [MultipleShortAnswerQuestion]
-DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"
-NEWLINE = "\n"
+
 QUESTION_FORMAT_TUPLE = (MultipleShortAnswerQuestion, MultipleAnswersQuestion, ShortAnswerQuestion)
-QUIZLET_TERM_DEFINITION_DELIMITER = "\\btd"
-QUIZLET_CARDS_DELIMITER = "\\bc"
 
 
 class FileWriterTypes(Enum):
@@ -246,12 +244,14 @@ def format_answers(q: Any, writer_type: FileWriterTypes) -> str:
     """
 
     def format_writer(q_answers: Union[str, List[str], Dict[str, str]]) -> str:
+        newline = "\n"
+        
         if writer_type == FileWriterTypes.Text:
-            return f"Answer(s): {', '.join(q_answers) if isinstance(q_answers, list) else NEWLINE.join([f'{key} : {value}' for key, value in q_answers.items()])}"
+            return f"Answer(s): {', '.join(q_answers) if isinstance(q_answers, list) else newline.join([f'{key} : {value}' for key, value in q_answers.items()])}"
         elif writer_type == FileWriterTypes.Quizlet:
-            return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{', '.join(q_answers) if isinstance(q_answers, list) else NEWLINE.join([f'{key} : {value}' for key, value in q_answers.items()])}"
+            return f"{QUIZLET_TERM_DEFINITION_DELIMITER}{', '.join(q_answers) if isinstance(q_answers, list) else newline.join([f'{key} : {value}' for key, value in q_answers.items()])}"
         elif writer_type == FileWriterTypes.Markdown:
-            return f"#### _Answer(s):_ {''.join([f'{NEWLINE}- {item}' for item in q_answers]) if isinstance(q_answers, list) else ''.join([f'{NEWLINE}- {key} : {value}' for key, value in q_answers.items()])}"
+            return f"#### _Answer(s):_ {''.join([f'{newline}- {item}' for item in q_answers]) if isinstance(q_answers, list) else ''.join([f'{newline}- {key} : {value}' for key, value in q_answers.items()])}"
 
     if hasattr(q, 'answers') and q.answers or hasattr(q, 'answer') and q.answer:
 

@@ -88,6 +88,7 @@ class Quiz:
 
         for question in self.multiple_choice_questions + other.multiple_choice_questions:
             if question not in seen_questions:
+                print(question)
                 seen_questions.add(question)
                 combined_quiz.multiple_choice_questions.append(question)
 

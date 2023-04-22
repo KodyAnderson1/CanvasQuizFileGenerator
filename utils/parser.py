@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Dict
 from bs4 import BeautifulSoup
 
+from utils.constants import NO_ANSWER
 from utils.questions import ShortAnswerQuestion
 from utils.utils import clean_input, get_all_questions, extract_points, get_question_text, text_by_filter, \
     find_elements_by_class, get_text_from_input, get_title_text, get_class_names
@@ -12,8 +13,6 @@ from utils.quiz import (
     MultipleChoiceQuestion,
     MultipleShortAnswerQuestion,
     Quiz)
-
-NO_ANSWER = "CANNOT DETERMINE ANSWER. PLEASE CHECK MANUALLY."
 
 
 class QuestionTypes(Enum):
@@ -30,6 +29,7 @@ class QuestionTypes(Enum):
 def parse_multiple_choice(soup: BeautifulSoup) -> MultipleChoiceQuestion:
     """
     Processes multiple-choice questions and returns a populated MultipleChoiceQuestion object.
+    True and False questions also come through this function
 
     :return: A MultipleChoiceQuestion object
     """
@@ -43,9 +43,25 @@ def parse_multiple_choice(soup: BeautifulSoup) -> MultipleChoiceQuestion:
         selected_answer = text_by_filter(soup=soup, initial_filter="selected_answer", last_filter="answer_text")
         mcq.answer = selected_answer[0] if len(selected_answer) > 0 else ""
     elif not mcq.answer and points[0] != points[1]:
-        mcq.answer = NO_ANSWER
+        is_true_false = any(item.lower() in ['true', 'false'] for item in mcq.choices)
+
+        mcq.answer = get_true_false_answer(soup=soup) if is_true_false else NO_ANSWER
 
     return mcq
+
+
+def get_true_false_answer(soup: BeautifulSoup) -> str:
+    """
+
+    :param soup:
+    :return:
+    """
+    selected_answer = text_by_filter(soup=soup, initial_filter="selected_answer", last_filter="answer_text")
+
+    if selected_answer and selected_answer[0].lower() in ['true', 'false']:
+        return str(not selected_answer[0].lower() == 'true')
+
+    return NO_ANSWER
 
 
 def parse_multiple_answer(soup: BeautifulSoup) -> MultipleAnswersQuestion:
