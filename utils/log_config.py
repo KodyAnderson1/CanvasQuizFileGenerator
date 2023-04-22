@@ -3,6 +3,11 @@ import os
 import sys
 from datetime import date
 
+import yaml
+
+with open("configurations.yaml", "r") as f:
+    paths = yaml.safe_load(f)
+
 
 class CustomFileHandler(logging.FileHandler):
     def __init__(self, filename, max_lines=1500, mode='a', encoding=None, delay=False):
@@ -33,9 +38,10 @@ class CustomFileHandler(logging.FileHandler):
 
 
 def setup_logging():
+    log_path = paths["directory_paths"]['logs']
     # Create a logs directory if it doesn't exist
-    if not os.path.exists('./logs'):
-        os.makedirs('./logs')
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
 
     # Set up the root logger
     logger = logging.getLogger()
@@ -52,7 +58,8 @@ def setup_logging():
     logger.addHandler(console_handler)
 
     # Set up the custom file handler for warning, error, and critical messages
-    file_handler = CustomFileHandler('./logs/logfile.log')
+    file_handler = CustomFileHandler(os.path.join(log_path, "logfile.log"))
+
     file_handler.setLevel(logging.WARNING)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)

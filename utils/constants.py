@@ -1,0 +1,6 @@
+NO_ANSWER = "CANNOT DETERMINE ANSWER. PLEASE CHECK MANUALLY."
+
+"""############## Quiz Writer ##############"""
+QUIZLET_TERM_DEFINITION_DELIMITER = "\\btd"
+QUIZLET_CARDS_DELIMITER = "\\bc"
+DASHES_WITH_NEWLINES = f"\n{'-' * 32}\n\n"

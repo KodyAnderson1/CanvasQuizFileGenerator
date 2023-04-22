@@ -5,7 +5,10 @@ from typing import List, Optional
 
 from bs4 import BeautifulSoup, Tag
 
-NO_ANSWER = "CANNOT DETERMINE ANSWER. PLEASE CHECK MANUALLY."
+from utils.constants import NO_ANSWER
+
+
+# NO_ANSWER = "CANNOT DETERMINE ANSWER. PLEASE CHECK MANUALLY."
 
 
 def get_all_questions(soup: BeautifulSoup = None) -> List[BeautifulSoup]:
