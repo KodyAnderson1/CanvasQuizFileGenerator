@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import List, Dict, Any
-
+import logging
+from utils.constants import NO_ANSWER
 from utils.questions import (
     MultipleShortAnswerQuestion,
     MultipleChoiceQuestion,
@@ -81,16 +82,20 @@ class Quiz:
         return quiz
 
     def combine(self, other: 'Quiz') -> 'Quiz':
-        # combined_quiz = Quiz(title=self.title + " & " + other.title)
         combined_quiz = Quiz(title="Combined Quiz")
 
         seen_questions = set()
 
         for question in self.multiple_choice_questions + other.multiple_choice_questions:
             if question not in seen_questions:
-                print(question)
                 seen_questions.add(question)
                 combined_quiz.multiple_choice_questions.append(question)
+            else:
+                index = combined_quiz.multiple_choice_questions.index(question)
+                existing_question = combined_quiz.multiple_choice_questions[index]
+                if question.answer != NO_ANSWER and existing_question.answer == NO_ANSWER:
+                    logging.warning(f"Replacing {existing_question}with {question}")
+                    combined_quiz.multiple_choice_questions[index] = question
 
         seen_questions.clear()
 

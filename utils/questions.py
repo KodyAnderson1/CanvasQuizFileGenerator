@@ -90,10 +90,11 @@ class MultipleChoiceQuestion(Question):
     def __eq__(self, other):
         if not isinstance(other, MultipleChoiceQuestion):
             return False
-        return super().__eq__(other) and self.answer == other.answer and self.choices == other.choices
+        # return super().__eq__(other) and self.answer == other.answer and self.choices == other.choices
+        return super().__eq__(other) and self.choices == other.choices
 
     def __hash__(self):
-        return hash((super().__hash__(), self.answer, tuple(self.choices)))
+        return hash((super().__hash__(), tuple(self.choices)))
 
 
 class MatchingQuestion(Question):
