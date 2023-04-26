@@ -145,6 +145,30 @@ def parse_short_answer(soup: BeautifulSoup) -> ShortAnswerQuestion:
     return saq
 
 
+def process_html(html_content: str) -> Quiz:
+    """
+    Processes the HTML content and returns a Quiz object.
+
+    :param html_content: The HTML content to process.
+    :return: A Quiz object.
+    """
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    quiz = Quiz(title=get_title_text(soup))
+
+    questions_list = get_all_questions(soup)
+
+    quiz.number_of_questions = len(questions_list)
+
+    for item in questions_list:
+        class_names = get_class_names(item, 'display_question')
+        question_type = class_names[0] if class_names[0] else "QUESTION TYPE NOT FOUND"
+
+        add_to_quiz(quiz=quiz, question_type=question_type, soup=item)
+
+    return quiz
+
+
 def add_to_quiz(quiz: Quiz, question_type: str, soup: BeautifulSoup) -> Quiz:
     """
     Adds a question to the quiz object.
@@ -178,30 +202,6 @@ def add_to_quiz(quiz: Quiz, question_type: str, soup: BeautifulSoup) -> Quiz:
     else:
         quiz.unrecognized_questions[question_type].append(soup)
         logging.warning(f"WARNING: Unrecognized question type '{question_type}'")
-
-    return quiz
-
-
-def process_html(html_content: str) -> Quiz:
-    """
-    Processes the HTML content and returns a Quiz object.
-
-    :param html_content: The HTML content to process.
-    :return: A Quiz object.
-    """
-    soup = BeautifulSoup(html_content, 'html.parser')
-
-    quiz = Quiz(title=get_title_text(soup))
-
-    questions_list = get_all_questions(soup)
-
-    quiz.number_of_questions = len(questions_list)
-
-    for item in questions_list:
-        class_names = get_class_names(item, 'display_question')
-        question_type = class_names[0] if class_names[0] else "QUESTION TYPE NOT FOUND"
-
-        add_to_quiz(quiz=quiz, question_type=question_type, soup=item)
 
     return quiz
 
