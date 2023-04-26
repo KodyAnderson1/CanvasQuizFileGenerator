@@ -45,6 +45,7 @@ questions.**
 
 ## Dependencies
 
+- Python
 - BeautifulSoup
 - PyYAML
 
