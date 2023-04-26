@@ -6,8 +6,6 @@
 
 - The default format this project saves now is `qz.txt` which is a format intended to copy and paste directly into the
   import feature on a quizlet study set.
-- At the moment, the delimiters are hard-coded, but future iterations of the project will probably include a flag to
-  determine them yourself.
 - On the Quizlet import screen...
     - For `Between term and definition` click custom and enter `\btd`
     - For `Between cards` click custom and enter `\bc`
@@ -26,27 +24,8 @@
 
 ---
 
-**Warning: Check answers with positional indexing.**
-
-Previously, answer positions could change when quiz files were generated. This issue should be resolved, but remain
-cautious.
-
-Example:
-
-```txt
-What forms the bridge between the software environment and the database environment?
-1. Both A and C
-2. Second-party interface
-3. Third-party Interface
-4. Standardized query
-
-Answer: Both A and C
-```
-
----
-
 This project helps parse and save quizzes in various formats, such as text, markdown, JSON, YAML, and a Quizlet import
-friendly textfile. Generated from Canvas `.html` files. The `.html` file must be the quiz itself, not a submission page
+friendly textfile. Generated from Canvas `.html` files. The `.html` file **must be the quiz itself**, not a submission page
 or any other page that loads the quiz as a secondary item.
 
 **Currently supports multiple choice, matching, multiple answer (selection box), short answer, and multiple short answer
