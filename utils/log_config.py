@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import json
 from datetime import date
 
 import yaml
@@ -17,24 +18,27 @@ class CustomFileHandler(logging.FileHandler):
         self.new_day = True
 
     def emit(self, record):
-        # Check if it's a new day
-        today = date.today()
-        if today != self.current_date:
-            self.current_date = today
-            self.new_day = True
-
         # Check if the log file has reached the maximum number of lines
         if sum(1 for _ in open(self.baseFilename)) >= self.max_lines:
             self.close()
             os.remove(self.baseFilename)
             self.stream = self._open()
 
-        # Add a custom heading for the new day
-        if self.new_day:
-            self.stream.write(f"Log entries for {self.current_date}:\n")
-            self.new_day = False
-
         super().emit(record)
+
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_entry = {
+            'asctime': self.formatTime(record, self.datefmt),
+            'levelname': record.levelname,
+            'filename': record.filename,
+            'funcName': record.funcName,
+            'lineno': record.lineno,
+            'processName': record.processName,
+            'message': record.getMessage()
+        }
+        return json.dumps(log_entry)
 
 
 def setup_logging():
@@ -47,9 +51,8 @@ def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    # Set up the formatter
-    formatter = logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(processName)s\n%(message)s')
+    # Set up the JSON formatter
+    formatter = JsonFormatter()
 
     # Set up the console handler for debug and info messages
     console_handler = logging.StreamHandler(sys.stdout)

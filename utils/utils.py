@@ -220,3 +220,20 @@ def get_title_text(soup: BeautifulSoup) -> Optional[str]:
         return f'No Title Found_{uuid.uuid4()}'
 
     return "".join(c for c in title_tag.text if c not in (":", ";", ",", '.'))
+
+
+def clean_filename(text):
+    """Cleans a string to be used as a filename."""
+    # Remove any non-alphanumeric characters, hyphens, or underscores and
+    # replace any consecutive spaces with a single hyphen
+    text = re.sub(r'[^\w\s-]', '-', text)
+    text = re.sub(r'\s+', '-', text)
+
+    # Remove any leading or trailing hyphens or underscores
+    text = text.strip('-_')
+
+    # Make sure the filename isn't too long
+    max_filename_length = 255
+    text = text[:max_filename_length]
+
+    return text
