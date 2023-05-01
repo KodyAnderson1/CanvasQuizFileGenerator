@@ -31,7 +31,7 @@ class QuizProcessor:
             html_content = self.read_html_file(file)
             return process_html(html_content)
 
-        logging.critical("Invalid combination of arguments. _process_file() should not be called.")
+        # logging.critical("Invalid combination of arguments. _process_file() should not be called.")
 
     def process_files(self):
         with ProcessPoolExecutor(max_workers=self.args.cores) as executor:

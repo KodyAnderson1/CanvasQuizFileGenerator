@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from utils.constants import NO_ANSWER
 from utils.questions import ShortAnswerQuestion
 from utils.utils import clean_input, get_all_questions, extract_points, get_question_text, text_by_filter, \
-    find_elements_by_class, get_text_from_input, get_title_text, get_class_names
+    find_elements_by_class, get_text_from_input, get_title_text, get_class_names, clean_filename
 from utils.quiz import (
     MatchingQuestion,
     MultipleAnswersQuestion,
@@ -154,10 +154,12 @@ def process_html(html_content: str) -> Quiz:
     """
     soup = BeautifulSoup(html_content, 'html.parser')
 
-    quiz = Quiz(title=get_title_text(soup))
+    quiz_title = get_title_text(soup)
+    cleaned_title = clean_filename(quiz_title)
+
+    quiz = Quiz(title=cleaned_title)
 
     questions_list = get_all_questions(soup)
-
     quiz.number_of_questions = len(questions_list)
 
     for item in questions_list:
